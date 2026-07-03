@@ -356,6 +356,9 @@ def _merge(base, over):
 class Config:
     def __init__(self):
         self._d = self._load()
+        self._save_timer = None
+        self._save_lock = threading.Lock()
+        atexit.register(self.flush)
 
     def _load(self):
         if os.path.exists(CFG_FILE):
@@ -365,9 +368,29 @@ class Config:
             except Exception: pass
         return copy.deepcopy(DEFAULTS)
 
-    def save(self):
+    def _write_now(self):
+        data = json.dumps(self._d, ensure_ascii=False, indent=2)
         with open(CFG_FILE,"w",encoding="utf-8") as f:
-            json.dump(self._d, f, ensure_ascii=False, indent=2)
+            f.write(data)
+
+    def save(self, delay=0.4):
+        # Debounced: collapses rapid-fire saves (e.g. dragging a settings
+        # slider fires this on every pixel) into a single disk write, off
+        # the UI thread.
+        with self._save_lock:
+            if self._save_timer is not None:
+                self._save_timer.cancel()
+            self._save_timer = threading.Timer(delay, self._write_now)
+            self._save_timer.daemon = True
+            self._save_timer.start()
+
+    def flush(self):
+        """Write immediately and cancel any pending debounced save. Runs at exit."""
+        with self._save_lock:
+            if self._save_timer is not None:
+                self._save_timer.cancel()
+                self._save_timer = None
+        self._write_now()
 
     def g(self, *keys):
         d = self._d
@@ -388,6 +411,9 @@ class Config:
 class Sessions:
     def __init__(self):
         self._d = self._load()
+        self._save_timer = None
+        self._save_lock = threading.Lock()
+        atexit.register(self.flush)
 
     def _load(self):
         if os.path.exists(DATA_FILE):
@@ -397,9 +423,29 @@ class Sessions:
         name = f"Sesja {datetime.now().strftime('%d.%m.%Y')}"
         return {"last": name, "sessions": {name: {"puzzle":"3x3","times":[]}}}
 
-    def _save(self):
+    def _write_now(self):
+        data = json.dumps(self._d, ensure_ascii=False, indent=2)
         with open(DATA_FILE,"w",encoding="utf-8") as f:
-            json.dump(self._d, f, ensure_ascii=False, indent=2)
+            f.write(data)
+
+    def _save(self, delay=0.4):
+        # Debounced + off the UI thread: sessions.json is 190KB+ and growing;
+        # rewriting it synchronously on every solve was blocking the UI thread
+        # right at the moment a solve finishes (see _record()).
+        with self._save_lock:
+            if self._save_timer is not None:
+                self._save_timer.cancel()
+            self._save_timer = threading.Timer(delay, self._write_now)
+            self._save_timer.daemon = True
+            self._save_timer.start()
+
+    def flush(self):
+        """Write immediately and cancel any pending debounced save. Runs at exit."""
+        with self._save_lock:
+            if self._save_timer is not None:
+                self._save_timer.cancel()
+                self._save_timer = None
+        self._write_now()
 
     @property
     def names(self):  return list(self._d["sessions"].keys())
@@ -2197,9 +2243,13 @@ class ToolsWindow(ctk.CTkToplevel):
                        color="#ff5555", s=22, marker="x", zorder=4, label="DNF/DNS")
 
         # rolling ao5
+        # _ao_n only ever looks at the last n elements of what it's given
+        # (t[-n:]), so passing the whole times[:i+1] growing prefix on every
+        # iteration was an O(n^2) chain of prefix copies for no reason - a
+        # fixed n-sized slice gives the exact same result.
         ao5_pts = []
         for i in range(4, len(times)):
-            v = self._ao_n(5, times[:i+1])
+            v = self._ao_n(5, times[i-4:i+1])
             if v and v != float("inf"):
                 ao5_pts.append((i + 1, v))
         if ao5_pts:
@@ -2209,7 +2259,7 @@ class ToolsWindow(ctk.CTkToplevel):
         # rolling ao12
         ao12_pts = []
         for i in range(11, len(times)):
-            v = self._ao_n(12, times[:i+1])
+            v = self._ao_n(12, times[i-11:i+1])
             if v and v != float("inf"):
                 ao12_pts.append((i + 1, v))
         if ao12_pts:
@@ -3185,7 +3235,7 @@ class App(ctk.CTk):
 
         # bump generation so any background loader from a previous session dies
         self._load_gen = getattr(self, "_load_gen", 0) + 1
-        for w, _ in self._row_widgets:
+        for w, _, _ in self._row_widgets:
             if w: w.destroy()
         self._row_widgets.clear(); self._top_row = None
 
@@ -3417,11 +3467,20 @@ class App(ctk.CTk):
         self._set_timer_color(self.STOPPED)
         self._refresh_pen_buttons(entry["penalty"])
         if self._row_widgets:
-            _, lbl = self._row_widgets[-1]
+            _, lbl, _ = self._row_widgets[-1]
             lbl.configure(text=display(entry, dec))
         self._update_stats()
 
     # ── times list ────────────────────────────────────────────────
+
+    def _row_index(self, row):
+        # Rows can be deleted individually now (see _del_time), so a click
+        # handler can't capture a fixed index at creation time - it would go
+        # stale for every row after the deleted one. Look it up live instead.
+        for i, (r, _, _) in enumerate(self._row_widgets):
+            if r is row:
+                return i
+        return None
 
     def _add_row(self, entry):
         n   = len(self._row_widgets)+1
@@ -3442,14 +3501,13 @@ class App(ctk.CTk):
                            font=ctk.CTkFont(size=13, weight="bold"))
         tlb.pack(side="left", padx=(0,6), pady=4)
 
-        real_i = n-1
         for w in (row, num, tlb):
-            w.bind("<Button-1>", lambda e, i=real_i: self._show_detail(i))
-            w.bind("<Button-3>", lambda e, i=real_i: self._ctx(e, i))
+            w.bind("<Button-1>", lambda e, r=row: self._show_detail(self._row_index(r)))
+            w.bind("<Button-3>", lambda e, r=row: self._ctx(e, self._row_index(r)))
             w.bind("<Enter>",    lambda e, r=row: r.configure(fg_color=("gray75","gray25")))
             w.bind("<Leave>",    lambda e, r=row, b=bg: r.configure(fg_color=b))
 
-        self._row_widgets.append((row, tlb))
+        self._row_widgets.append((row, tlb, num))
 
     def _ctx(self, event, idx):
         times = self.sm.get(self.cur)["times"]
@@ -3470,7 +3528,7 @@ class App(ctk.CTk):
         entry["penalty"] = None if entry["penalty"]==pen else pen
         self.sm.update(self.cur, idx, entry)
         dec = self.cfg.g("timer","decimals")
-        _, lbl = self._row_widgets[idx]
+        _, lbl, _ = self._row_widgets[idx]
         lbl.configure(text=display(entry, dec))
         if self._state==self.STOPPED and idx==len(times)-1:
             self.timer_var.set(display(entry, dec))
@@ -3494,9 +3552,15 @@ class App(ctk.CTk):
             self._stat_win.destroy()
         self._stat_win = None
         self.sm.delete(self.cur, idx)
-        for w,_ in self._row_widgets: w.destroy()
-        self._row_widgets.clear(); self._top_row = None
-        for e in self.sm.get(self.cur)["times"]: self._add_row(e)
+        # Remove just the one row instead of destroying and rebuilding every
+        # widget in the list (main.py used to do this on every delete, which
+        # freezes the UI for a couple seconds on a large session).
+        row, _, _ = self._row_widgets.pop(idx)
+        row.destroy()
+        self._top_row = self._row_widgets[-1][0] if self._row_widgets else None
+        for i in range(idx, len(self._row_widgets)):
+            _, _, num_lbl = self._row_widgets[i]
+            num_lbl.configure(text=f" {i+1}.")
         self._update_stats()
         if self._tools_win and self._tools_win.winfo_exists():
             self._tools_win.refresh_after_solve()
@@ -3645,6 +3709,12 @@ class App(ctk.CTk):
         #     if it's left stopped;
         #   • it only counts as a solve once the timer has actually been at 0
         #     (so an idle/old value is never recorded).
+        if not (self._moyu and self._moyu.running):
+            # Hardware timer feature is off (or not connected): check back
+            # occasionally instead of scheduling a permanent 20-50ms tick
+            # forever that competes with the Tk event loop for no reason.
+            self.after(500, self._moyu_poll)
+            return
         try:
             m = self._moyu
             if m and m.running:
