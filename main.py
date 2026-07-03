@@ -673,6 +673,146 @@ class Cube2State:
                     fill=_WCA_HEX[col], outline='#111111', width=bw)
 
 
+# ── 4x4x4 (Rubik's Revenge) — 3D-coordinate model, same technique as Skewb
+# below: each sticker is a point (x,y,z) with an outward normal, and a move
+# rotates every sticker whose axis coordinate falls in the turning layer(s)
+# by the matching 90°/180° rotation matrix. This avoids hand-authoring
+# face-cycle tables (error-prone to get right by hand — the classic mirror/
+# wrong-direction bug). Verified against Herbert Kociemba's two-phase-solver
+# corner-permutation tables (cpU/cpR/cpF/cpD in
+# https://github.com/hkociemba/RubiksCube-TwophaseSolver/blob/master/cubie.py):
+# a single U/D/R/F move here produces exactly the same corner cycle as that
+# reference implementation.
+
+_C4_FACE_NORMALS = {
+    'U': (0, 1, 0), 'D': (0, -1, 0), 'F': (0, 0, 1),
+    'B': (0, 0, -1), 'L': (-1, 0, 0), 'R': (1, 0, 0),
+}
+_C4_SOLVED = {'U': 'W', 'D': 'Y', 'F': 'G', 'B': 'B', 'L': 'O', 'R': 'R'}
+
+# Per-face (row, col) convention chosen to already match the flat-net drawing
+# orientation (U top, L-F-R-B row, D bottom) — see draw_net below.
+def _c4_forward(face, row, col):
+    if face == 'U': return (2*col-3, 3, 2*row-3)
+    if face == 'D': return (2*col-3, -3, 3-2*row)
+    if face == 'F': return (2*col-3, 3-2*row, 3)
+    if face == 'B': return (3-2*col, 3-2*row, -3)
+    if face == 'L': return (-3, 3-2*row, 2*col-3)
+    if face == 'R': return (3, 3-2*row, 3-2*col)
+
+def _c4_inverse(face, x, y, z):
+    if face == 'U': return (z+3)//2, (x+3)//2
+    if face == 'D': return (3-z)//2, (x+3)//2
+    if face == 'F': return (3-y)//2, (x+3)//2
+    if face == 'B': return (3-y)//2, (3-x)//2
+    if face == 'L': return (3-y)//2, (z+3)//2
+    if face == 'R': return (3-y)//2, (3-z)//2
+
+def _c4_rx(y, z, a):
+    if a == 90:  return -z, y
+    if a == -90: return z, -y
+    return -y, -z          # 180
+
+def _c4_ry(x, z, a):
+    if a == 90:  return z, -x
+    if a == -90: return -z, x
+    return -x, -z
+
+def _c4_rz(x, y, a):
+    if a == 90:  return -y, x
+    if a == -90: return y, -x
+    return -x, -y
+
+# letter -> (axis, base_angle for one CW turn, outer-layer coord, wide-layer coords)
+_C4_BASE = {
+    'U': ('y', -90, frozenset({3}),  frozenset({3, 1})),
+    'D': ('y',  90, frozenset({-3}), frozenset({-3, -1})),
+    'R': ('x', -90, frozenset({3}),  frozenset({3, 1})),
+    'L': ('x',  90, frozenset({-3}), frozenset({-3, -1})),
+    'F': ('z', -90, frozenset({3}),  frozenset({3, 1})),
+    'B': ('z',  90, frozenset({-3}), frozenset({-3, -1})),
+}
+_C4_AXIS_IDX = {'x': 0, 'y': 1, 'z': 2}
+
+
+class Cube4State:
+    def __init__(self):
+        self.stickers = []   # list of [x,y,z, nx,ny,nz, color]
+        for face, normal in _C4_FACE_NORMALS.items():
+            color = _C4_SOLVED[face]
+            for row in range(4):
+                for col in range(4):
+                    x, y, z = _c4_forward(face, row, col)
+                    self.stickers.append([x, y, z, *normal, color])
+
+    def _turn(self, axis, layers, angle):
+        ai = _C4_AXIS_IDX[axis]
+        for s in self.stickers:
+            if s[ai] not in layers:
+                continue
+            if axis == 'x':
+                s[1], s[2] = _c4_rx(s[1], s[2], angle)
+                s[4], s[5] = _c4_rx(s[4], s[5], angle)
+            elif axis == 'y':
+                s[0], s[2] = _c4_ry(s[0], s[2], angle)
+                s[3], s[5] = _c4_ry(s[3], s[5], angle)
+            else:
+                s[0], s[1] = _c4_rz(s[0], s[1], angle)
+                s[3], s[4] = _c4_rz(s[3], s[4], angle)
+
+    def apply(self, move_str):
+        for tok in move_str.split():
+            if not tok:
+                continue
+            base_info = _C4_BASE.get(tok[0])
+            if base_info is None:
+                continue
+            axis, base_angle, outer, wide = base_info
+            rest = tok[1:]
+            is_wide = rest.startswith('w')
+            if is_wide:
+                rest = rest[1:]
+            layers = wide if is_wide else outer
+            if rest == '':
+                angle = base_angle
+            elif rest == "'":
+                angle = -base_angle
+            elif rest == '2':
+                angle = 180
+            else:
+                continue
+            self._turn(axis, layers, angle)
+
+    def draw_net(self, canvas, x0, y0, cell):
+        grids = {}
+        for face, normal in _C4_FACE_NORMALS.items():
+            grid = [[None] * 4 for _ in range(4)]
+            for s in self.stickers:
+                if (s[3], s[4], s[5]) != normal:
+                    continue
+                r, c = _c4_inverse(face, s[0], s[1], s[2])
+                grid[r][c] = s[6]
+            grids[face] = grid
+        origins = {
+            'U': (x0 + 4*cell,  y0),
+            'L': (x0,           y0 + 4*cell),
+            'F': (x0 + 4*cell,  y0 + 4*cell),
+            'R': (x0 + 8*cell,  y0 + 4*cell),
+            'B': (x0 + 12*cell, y0 + 4*cell),
+            'D': (x0 + 4*cell,  y0 + 8*cell),
+        }
+        bw = max(1, cell // 10)
+        for face, (fx, fy) in origins.items():
+            grid = grids[face]
+            for r in range(4):
+                for c in range(4):
+                    x1 = fx + c*cell
+                    y1 = fy + r*cell
+                    canvas.create_rectangle(
+                        x1, y1, x1 + cell - 1, y1 + cell - 1,
+                        fill=_WCA_HEX[grid[r][c]], outline='#111111', width=bw)
+
+
 # ── Skewb — geometric model (user grip) + isometric 2D net ───────
 # A 3-D Skewb: each sticker carries an outward normal + a location (a cube
 # corner ±1, or the face centre).  A move rotates the half of the puzzle on
@@ -1071,6 +1211,13 @@ def _make_viz_state(puzzle, scramble):
                 base = tok[:-1] if tok.endswith("'") or tok.endswith("2") else tok
                 if base not in valid: return None
             cs = SkewbState(); cs.apply(scramble); return cs
+        if puzzle == "4x4":
+            valid = {'U','D','R','L','F','B'}
+            for tok in (scramble or "").split():
+                base = tok[:-1] if tok.endswith("'") or tok.endswith("2") else tok
+                if base.endswith('w'): base = base[:-1]
+                if base not in valid: return None
+            cs = Cube4State(); cs.apply(scramble); return cs
         if puzzle == "FTO":
             valid = {'U','L','R','F','B','D','BL','BR'}
             for tok in (scramble or "").split():
@@ -1089,6 +1236,7 @@ def _viz_net_dims(state):
     """Returns (cols, rows) cell count of the net for this state type."""
     if isinstance(state, SkewbState): return 8, 7
     if isinstance(state, Cube2State): return 8, 6
+    if isinstance(state, Cube4State): return 16, 12
     if isinstance(state, FTOState): return 10, 4
     if isinstance(state, ClockState): return 12, 5
     return 12, 9
