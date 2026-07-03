@@ -423,6 +423,133 @@ class SkewbState:
             canvas.create_polygon(*flat, fill=col, outline='#111111', width=lw)
 
 
+# ── Pyraminx — faithful TNoodle port + 2D net ─────────────────────
+# State = TNoodle's PyraminxPuzzle.PyraminxState: image[4][9], face order
+# F,D,L,R matching the WCA default color scheme (green/yellow/red/blue).
+# Moves are TNoodle's exact 3-cycles: a face move (U/L/R/B) is a 3-cycle
+# of 3 layer stickers plus the tip 3-cycle together; a tip move (u/l/r/b)
+# is the tip 3-cycle alone. Net unfolding and the 9-triangle-per-face
+# subdivision are ported from TNoodle's drawMinx/drawTriangle geometry.
+# Cross-checked: the "L" tip's 3 stickers (F idx6, L idx2's own idx6, D
+# idx0) land at the same shared tetrahedron vertex both in the swap table
+# and in the net's pixel geometry.
+# Source: https://github.com/thewca/tnoodle-lib/blob/master/scrambles/src/main/java/org/worldcubeassociation/tnoodle/puzzle/PyraminxPuzzle.java
+
+_PYR_HEX = ['#00A651', '#FFD500', '#ED1C24', '#0051BA']   # F, D, L, R
+
+_PYR_TURN_SWAPS = {
+    0: [(0,8,3,8,2,2), (0,1,3,1,2,4), (0,2,3,2,2,5)],   # U
+    1: [(2,8,1,2,0,8), (2,7,1,1,0,7), (2,5,1,8,0,5)],   # L
+    2: [(3,8,0,5,1,5), (3,7,0,4,1,4), (3,5,0,2,1,2)],   # R
+    3: [(1,8,2,2,3,5), (1,7,2,1,3,4), (1,5,2,8,3,2)],   # B
+}
+_PYR_TIP_SWAP = {
+    0: (0,0,3,0,2,3),
+    1: (0,6,2,6,1,0),
+    2: (0,3,1,3,3,6),
+    3: (1,6,2,0,3,3),
+}
+_PYR_AXIS = {'U': 0, 'L': 1, 'R': 2, 'B': 3}
+
+
+class PyraminxState:
+    def __init__(self):
+        self.image = [[f] * 9 for f in range(4)]
+
+    def _swap3(self, f1, s1, f2, s2, f3, s3):
+        img = self.image
+        tmp = img[f1][s1]
+        img[f1][s1] = img[f2][s2]
+        img[f2][s2] = img[f3][s3]
+        img[f3][s3] = tmp
+
+    def _turn_tip(self, axis):
+        self._swap3(*_PYR_TIP_SWAP[axis])
+
+    def _turn(self, axis):
+        for cyc in _PYR_TURN_SWAPS[axis]:
+            self._swap3(*cyc)
+        self._turn_tip(axis)
+
+    def apply(self, move_str):
+        for tok in move_str.split():
+            if not tok:
+                continue
+            letter = tok[0]
+            is_tip = letter.islower()
+            axis = _PYR_AXIS.get(letter.upper())
+            if axis is None:
+                continue
+            reps = 2 if tok.endswith("'") else 1   # 120° CCW == two CW turns (order 3)
+            for _ in range(reps):
+                if is_tip:
+                    self._turn_tip(axis)
+                else:
+                    self._turn(axis)
+
+    @staticmethod
+    def _tri_cells(p0, p1, p2):
+        """Split triangle p0,p1,p2 into 9 small triangles. Index layout
+        matches TNoodle's drawTriangle: 0/3/6 are the corner (tip)
+        triangles at p0/p1/p2, the rest fill the middle."""
+        pts = [p0, p1, p2]
+        xs = [None] * 6
+        for i in range(3):
+            a, b = pts[i], pts[(i + 1) % 3]
+            xs[i]     = (a[0] + (b[0]-a[0])/3.0, a[1] + (b[1]-a[1])/3.0)       # near a
+            xs[i + 3] = (a[0] + 2*(b[0]-a[0])/3.0, a[1] + 2*(b[1]-a[1])/3.0)   # near b
+        center = (sum(p[0] for p in pts) / 3.0, sum(p[1] for p in pts) / 3.0)
+        cells = [None] * 9
+        for i in range(3):
+            cells[3*i]     = [pts[i], xs[i], xs[3 + (2 + i) % 3]]
+            cells[3*i + 1] = [xs[i], xs[3 + (i + 2) % 3], center]
+            cells[3*i + 2] = [xs[i], xs[i + 3], center]
+        return cells
+
+    def _face_triangles(self):
+        """Returns {face: (p0, p1, p2)} matching TNoodle's drawMinx layout:
+        F points up in the middle, D points down below it, L/R flank above."""
+        ps, gap = 1.0, 0.15
+        rad = 3 ** 0.5 * ps
+        def verts(cx, cy, point_up):
+            base = [7/6, 11/6, 1/2]
+            if point_up:
+                base = [a + 1/3 for a in base]
+            return [(cx + rad * math.cos(a * math.pi), cy + rad * math.sin(a * math.pi)) for a in base]
+        f_c = (2*gap + 3*ps, gap + 3**0.5*ps)
+        d_c = (2*gap + 3*ps, 2*gap + 2*3**0.5*ps)
+        l_c = (gap + 1.5*ps, gap + 3**0.5/2*ps)
+        r_c = (3*gap + 4.5*ps, gap + 3**0.5/2*ps)
+        return {
+            0: verts(*f_c, True),
+            1: verts(*d_c, False),
+            2: verts(*l_c, False),
+            3: verts(*r_c, False),
+        }
+
+    def draw_net(self, canvas, x0, y0, cell):
+        nc, nr = 8, 7
+        W, H = nc * cell, nr * cell
+        faces = self._face_triangles()
+        polys = []; xs = []; ys = []
+        for face, (p0, p1, p2) in faces.items():
+            for i, tri in enumerate(self._tri_cells(p0, p1, p2)):
+                color = _PYR_HEX[self.image[face][i]]
+                polys.append((tri, color))
+                xs += [p[0] for p in tri]; ys += [p[1] for p in tri]
+        bx0, bx1 = min(xs), max(xs); by0, by1 = min(ys), max(ys)
+        bw, bh = (bx1 - bx0) or 1, (by1 - by0) or 1
+        sc = min(W / bw, H / bh) * 0.94
+        ox = x0 + (W - bw*sc) / 2 - bx0*sc
+        oy = y0 + (H - bh*sc) / 2 - by0*sc
+        lw = max(1, cell // 16)
+        for tri, color in polys:
+            flat = []
+            for (px, py) in tri:
+                flat += [ox + px*sc, oy + py*sc]
+            canvas.create_polygon(*flat, fill=color, outline='#111111', width=lw)
+
+
 # ── FTO (Face-Turning Octahedron) — faithful csTimer port + 2D net ─
 # State = csTimer's FtoCubie (cp,co,ep,uf,rl); moves are csTimer's exact
 # piece permutations.  Display notation U L R F B D BL BR maps to csTimer's
@@ -690,6 +817,12 @@ def _make_viz_state(puzzle, scramble):
         if puzzle == "Clock":
             if "y2" not in (scramble or "").split(): return None
             cs = ClockState(); cs.apply(scramble); return cs
+        if puzzle == "Pyraminx":
+            valid = {'U','L','R','B'}
+            for tok in (scramble or "").split():
+                base = tok[:-1] if tok.endswith("'") else tok
+                if base.upper() not in valid: return None
+            cs = PyraminxState(); cs.apply(scramble); return cs
     except Exception:
         pass
     return None
@@ -700,6 +833,7 @@ def _viz_net_dims(state):
     if isinstance(state, SkewbState): return 8, 7
     if isinstance(state, Cube2State): return 8, 6
     if isinstance(state, Cube4State): return 16, 12
+    if isinstance(state, PyraminxState): return 8, 7
     if isinstance(state, FTOState): return 10, 4
     if isinstance(state, ClockState): return 12, 5
     return 12, 9
