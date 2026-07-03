@@ -206,7 +206,11 @@ with open(MAIN, encoding="utf-8") as f:
 A_START = "# Support running as a PyInstaller .exe (frozen) or as a plain .py script"
 A_END = "_migrate_legacy_data()"
 a_start = content.index(A_START)
-a_end = content.index(A_END) + len(A_END)
+# NOTE: use rindex, not index — "_migrate_legacy_data()" is also a substring
+# of the earlier "def _migrate_legacy_data():" line, so index() (first
+# match) would truncate the function. rindex() (last match) correctly
+# targets the actual call site. (Found during Task 3 execution.)
+a_end = content.rindex(A_END) + len(A_END)
 chunk_a = content[a_start:a_end]
 content = content[:a_start] + content[a_end:]
 
