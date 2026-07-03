@@ -3,3 +3,9 @@ __pycache__/
 build/
 dist/
 err.log
+
+# Personal solve data / dev-copy settings - never commit real user data.
+sessions.json
+settings.json
+_backup_data/
+.pytest_cache/
