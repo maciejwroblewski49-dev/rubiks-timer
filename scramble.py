@@ -13,7 +13,7 @@ def _gen(faces, mods, n):
     return "  ".join(moves)
 
 def gen_333():  return _gen(["U","D","R","L","F","B"], ["","'","2"], 20)
-def gen_222():  return _gen(["U","R","F","D","L","B"], ["","'","2"], 9)
+def gen_222():  return _gen(["U","R","F"], ["","'","2"], 9)
 def gen_444():  return _gen(["U","D","R","L","F","B","Uw","Dw","Rw","Lw","Fw","Bw"], ["","'","2"], 40)
 def gen_555():  return _gen(["U","D","R","L","F","B","Uw","Dw","Rw","Lw","Fw","Bw",
                               "3Uw","3Dw","3Rw","3Lw","3Fw","3Bw"], ["","'","2"], 60)
