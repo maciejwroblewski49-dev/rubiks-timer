@@ -42,6 +42,8 @@ import tkinter.colorchooser as cc
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
 
+from utils import fmt, display, effective, _bring_to_front, _HAS_WINSOUND, _winsound
+
 # matplotlib is only used inside the Tools window (charts + histogram).  Importing
 # it eagerly adds ~500 ms to the cold startup — instead we load it lazily the
 # first time a chart is actually built.
@@ -60,11 +62,7 @@ def _load_mpl():
         _HAS_MPL = False
     return _HAS_MPL
 
-try:
-    import winsound as _winsound
-    _HAS_WINSOUND = True
-except ImportError:
-    _HAS_WINSOUND = False
+
 
 # Windows: set app ID so taskbar shows custom icon (not generic Python icon)
 try:
@@ -267,21 +265,7 @@ COLOR_PRESETS = {
 #  Helpers
 # ══════════════════════════════════════════════════════════════════
 
-def fmt(sec, dec=3):
-    if sec >= 60:
-        m = int(sec // 60); s = sec % 60
-        return f"{m}:{s:0{dec+3}.{dec}f}"
-    return f"{sec:.{dec}f}"
 
-def display(entry, dec=3):
-    p = entry.get("penalty")
-    if p in ("DNF","DNS"): return p
-    return fmt(entry["time"] + (2 if p=="+2" else 0), dec)
-
-def effective(entry):
-    p = entry.get("penalty")
-    if p in ("DNF","DNS"): return float("inf")
-    return entry["time"] + (2 if p=="+2" else 0)
 
 # ══════════════════════════════════════════════════════════════════
 #  Config
@@ -336,12 +320,7 @@ DEFAULTS = {
     },
 }
 
-def _bring_to_front(win):
-    """Force a CTkToplevel window to appear on top and grab focus on Windows."""
-    win.attributes("-topmost", True)
-    win.lift()
-    win.focus_force()
-    win.after(300, lambda: win.attributes("-topmost", False) if win.winfo_exists() else None)
+
 
 
 def _merge(base, over):
