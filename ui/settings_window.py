@@ -2,11 +2,12 @@
 import os, json, csv, zipfile
 from datetime import datetime
 import customtkinter as ctk
+import tkinter.simpledialog as sd
 import tkinter.colorchooser as cc
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
 
-from utils import _bring_to_front, fmt
+from utils import _bring_to_front, fmt, effective
 from persistence import Config, Sessions, DATA_FILE, CFG_FILE, DATA_DIR
 from hardware_timer import MoyuInput
 
