@@ -1,0 +1,45 @@
+{
+  "theme": "dark",
+  "colors": {
+    "timer_idle": "#8e8471",
+    "timer_ready": "#FF0055",
+    "timer_running": "#00FFFF",
+    "timer_inspection": "#FF8800",
+    "timer_penalty": "#FF0055",
+    "scramble": "#ffff80",
+    "bg_window": "#008080",
+    "bg_header": "#808080"
+  },
+  "timer": {
+    "inspection_enabled": true,
+    "inspection_duration": 15,
+    "hide_during_solve": true,
+    "start_delay_ms": 0,
+    "decimals": 3,
+    "refresh_ms": 16
+  },
+  "stats": {
+    "show_best": true,
+    "show_ao5": true,
+    "show_ao12": true,
+    "show_ao100": true,
+    "show_mean": true,
+    "custom_averages": [
+      50
+    ]
+  },
+  "font": {
+    "timer_size": 120,
+    "scramble_size": 28,
+    "timer_family": "Courier New",
+    "scramble_family": "Courier"
+  },
+  "show_main_viz": true,
+  "ui_zoom": 1.0,
+  "scramble_align": "left",
+  "target": {
+    "enabled": true,
+    "time": 10.0,
+    "pb_sound": true
+  }
+}

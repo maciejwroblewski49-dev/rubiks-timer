@@ -1,0 +1,1668 @@
+{
+  "last": "Sesja 30.05.2026",
+  "sessions": {
+    "Sesja 30.05.2026": {
+      "puzzle": "3x3",
+      "times": [
+        {
+          "time": 11.582639899999776,
+          "penalty": null,
+          "scramble": "U  F'  R2  L  U  F'  L  D2  F  U  R'  L2  F'  U  L'  D  R2  F2  L'  B",
+          "date": "2026-05-30T20:34:20.131567"
+        },
+        {
+          "time": 10.623989100000472,
+          "penalty": null,
+          "scramble": "L'  U2  R2  F2  B'  U2  F'  R2  B'  U  L2  U2  B'  D'  B  F2  L2  U  D2  R'",
+          "date": "2026-05-30T20:54:47.660591"
+        },
+        {
+          "time": 9.595676699998876,
+          "penalty": null,
+          "scramble": "F'  L  R'  D'  U'  F  L'  U2  L  R2  F'  R'  U2  D  B'  L'  B  L  D  B",
+          "date": "2026-05-30T20:55:18.523721"
+        },
+        {
+          "time": 11.46922000000086,
+          "penalty": null,
+          "scramble": "D  L2  F'  L  B  L'  B  R  U'  L2  R  B2  D'  L2  F2  U'  R'  F  L2  R'",
+          "date": "2026-05-30T20:55:42.649947"
+        },
+        {
+          "time": 11.141079299999546,
+          "penalty": null,
+          "scramble": "F2  D  R2  F2  U  F2  R  F  D2  B2  L2  U2  F  R  F'  R'  B2  F'  R2  D2",
+          "date": "2026-05-30T20:56:04.855974"
+        },
+        {
+          "time": 8.598655399999188,
+          "penalty": null,
+          "scramble": "U'  D  B2  R'  L2  D2  R'  D2  L'  U'  B  L'  F2  D  B'  R'  U2  F  L  B2",
+          "date": "2026-05-30T21:14:10.750251"
+        },
+        {
+          "time": 9.148403000000144,
+          "penalty": null,
+          "scramble": "R2  B2  D'  F'  R  L2  D2  L2  B2  D  B2  U2  F2  R2  D2  L  D2  F'  R'  F",
+          "date": "2026-05-31T14:56:43.200505"
+        },
+        {
+          "time": 9.581978700000036,
+          "penalty": null,
+          "scramble": "D  U  R2  L2  U2  D  L2  U'  R  B2  R2  D2  F'  U2  R2  D  U2  R2  L2  U",
+          "date": "2026-05-31T14:57:04.633873"
+        },
+        {
+          "time": 10.996348599999692,
+          "penalty": null,
+          "scramble": "R2  D  R2  B2  D2  B'  F'  L  F'  R  F  L  U  D'  B'  F2  U  F'  U'  F'",
+          "date": "2026-05-31T14:57:32.871445"
+        },
+        {
+          "time": 11.379178000000138,
+          "penalty": null,
+          "scramble": "F'  U  R'  F2  R'  D2  U  F2  B2  D'  F  R2  L  U2  B  U  L2  U  R2  F2",
+          "date": "2026-05-31T15:10:40.141914"
+        },
+        {
+          "time": 12.34,
+          "penalty": null,
+          "scramble": "B'  R2  L  F'  U'  F  L  D2  B2  F'  U'  L'  R'  F  D2  R2  B  R2  F'  L'",
+          "date": "2026-05-31T16:04:23.854226",
+          "manual": true
+        },
+        {
+          "time": 12.34,
+          "penalty": null,
+          "scramble": "R2  L  U2  B'  U2  F  R'  F'  R'  U2  B'  U2  F'  R'  L'  D'  F  L'  R2  U'",
+          "date": "2026-05-31T16:05:10.417853",
+          "manual": true
+        },
+        {
+          "time": 10.11,
+          "penalty": null,
+          "scramble": "D'  R'  B'  D'  F'  L  R  U  L2  U  B  L2  U2  R2  B2  F'  R  D2  R'  D",
+          "date": "2026-05-31T16:16:45.939822",
+          "manual": true
+        },
+        {
+          "time": 8.88,
+          "penalty": null,
+          "scramble": "B'  L2  D2  B2  D'  F2  L2  D2  F  L2  D2  R  U  R2  U'  L  F2  U2  R'  F",
+          "date": "2026-05-31T16:17:11.498341",
+          "manual": true
+        },
+        {
+          "time": 9.99,
+          "penalty": null,
+          "scramble": "U  F2  U'  L'  F  U'  L2  B  L2  U2  D'  R'  B'  R  B'  D'  R'  U  F2  U'",
+          "date": "2026-05-31T16:21:54.141164",
+          "manual": true
+        },
+        {
+          "time": 9.99,
+          "penalty": null,
+          "scramble": "R  L  F  R2  U2  L2  D  L  U  D2  L  B2  F'  R'  D  F2  U'  D'  F'  R2",
+          "date": "2026-05-31T16:21:55.887928",
+          "manual": true
+        },
+        {
+          "time": 9.09,
+          "penalty": null,
+          "scramble": "F2  D  B  R2  F'  D2  B2  D2  R'  B  F  L2  F'  B2  L'  B2  R  D'  L'  D",
+          "date": "2026-05-31T16:21:59.096239",
+          "manual": true
+        },
+        {
+          "time": 1.3262887000000774,
+          "penalty": "DNF",
+          "scramble": "D  L2  U'  D2  L'  D2  R'  D2  B'  L'  D'  F'  D'  U  F  B2  D'  L  F2  L2",
+          "date": "2026-05-31T16:22:24.386036"
+        },
+        {
+          "time": 22.23,
+          "penalty": null,
+          "scramble": "B'  F'  R  U'  D'  B  L2  R'  F2  L  U2  F  B  R'  D2  L  F'  D  L2  U",
+          "date": "2026-05-31T16:22:26.949484",
+          "manual": true
+        },
+        {
+          "time": 12.57319009999992,
+          "penalty": null,
+          "scramble": "R'  D2  R'  F  R2  B  D'  U'  F'  D'  U2  B2  L'  D  B  R2  B'  U'  L  U",
+          "date": "2026-05-31T16:23:13.421444"
+        },
+        {
+          "time": 8.940935100001298,
+          "penalty": null,
+          "scramble": "F'  U2  B2  U2  B2  F  R'  B2  R  B'  F  L  U'  F'  R2  L'  B  L  D2  L",
+          "date": "2026-05-31T16:34:06.897535"
+        },
+        {
+          "time": 10.032847800001036,
+          "penalty": null,
+          "scramble": "U  R  U  R'  U  F2  B2  L2  R2  B'  D'  U  L  D  R'  B'  R'  B2  L2  U",
+          "date": "2026-05-31T16:34:26.995022"
+        },
+        {
+          "time": 10.80408990000069,
+          "penalty": null,
+          "scramble": "L  U  R  U  D2  F  U2  R2  L  F  L'  F  U  L2  D'  U  F  U  F'  D'",
+          "date": "2026-05-31T16:35:10.465362"
+        },
+        {
+          "time": 7.916699100000187,
+          "penalty": null,
+          "scramble": "U'  B  L  B2  U  F2  B2  U  R2  U'  L'  F'  B  U'  F  D'  L'  D  F2  L'",
+          "date": "2026-05-31T16:35:29.488183",
+          "note": "no taki średni no nie"
+        },
+        {
+          "time": 9.09,
+          "penalty": null,
+          "scramble": "B  U  R'  U'  F  U'  L  F'  R'  U2  R2  L  F2  R  L  D2  L'  D'  U  L",
+          "date": "2026-05-31T19:49:44.652469",
+          "manual": true
+        },
+        {
+          "time": 8.89,
+          "penalty": null,
+          "scramble": "U'  L  B  F'  L2  B'  D'  F2  B2  L2  D  R  F2  U  L'  B2  F2  L2  F  B'",
+          "date": "2026-05-31T19:49:46.830010",
+          "manual": true
+        },
+        {
+          "time": 1.7944508000000496,
+          "penalty": "DNF",
+          "scramble": "F'  U2  L  R2  D  R'  D  L2  B  L'  F'  L'  R  F2  B  L'  D2  R  F  U'",
+          "date": "2026-05-31T19:49:54.186700"
+        },
+        {
+          "time": 10.170820499999536,
+          "penalty": "+2",
+          "scramble": "F'  R2  B  D  B2  U2  F'  L'  R2  B'  R  U2  F2  D'  F'  U  L2  F2  B  D'",
+          "date": "2026-05-31T20:48:54.640927"
+        },
+        {
+          "time": 11.795404400003463,
+          "penalty": null,
+          "scramble": "B'  R  F  L  D'  U'  F2  R  D2  F2  D'  U'  L  F2  L  F  B'  L  D  R'",
+          "date": "2026-05-31T20:49:51.621924"
+        },
+        {
+          "time": 12.03991060000044,
+          "penalty": null,
+          "scramble": "R'  L  U  D  L2  U2  B2  R2  F'  R  U'  D'  R  D  B2  D2  F'  B2  R  D'",
+          "puzzle": "3x3",
+          "date": "2026-05-31T21:40:35.647592"
+        },
+        {
+          "time": 9.99700689999736,
+          "penalty": null,
+          "scramble": "L'  R  D'  F2  U'  R2  B  F'  L  F  U  B'  F2  L2  R2  D  F2  D2  F'  L2",
+          "puzzle": "3x3",
+          "date": "2026-05-31T22:00:07.969738"
+        },
+        {
+          "time": 10.850056999999651,
+          "penalty": null,
+          "scramble": "B  R  D  U  B  U  F'  B'  L  U'  F  R2  L  F2  L'  D2  L'  R'  D  L2",
+          "puzzle": "3x3",
+          "date": "2026-05-31T22:00:45.594815"
+        },
+        {
+          "time": 10.918202900000324,
+          "penalty": null,
+          "scramble": "L  D  B2  R  U'  F2  D'  U2  B2  D'  R  L2  F2  B'  R2  B'  U  L2  B  D",
+          "puzzle": "3x3",
+          "date": "2026-05-31T22:01:06.907048"
+        },
+        {
+          "time": 12.897442700003012,
+          "penalty": null,
+          "scramble": "F2  U  F  R  B  L  R2  D2  R2  D  R  F2  D  F  L2  D2  B2  U2  L2  R",
+          "puzzle": "3x3",
+          "date": "2026-05-31T22:01:40.286165"
+        },
+        {
+          "time": 13.153,
+          "penalty": null,
+          "scramble": "D' B U2 F2 R' F2 D2 L' D2 R' B2 U2 F' D' U' B' D R2 D",
+          "note": "",
+          "date": "2024-11-20T17:26:37",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.717,
+          "penalty": null,
+          "scramble": "U2 F2 U' B' L2 D2 L F2 R2 F2 D' B2 U2 L2 D' B2 D B2 L' D'",
+          "note": "",
+          "date": "2024-11-20T17:27:05",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.532,
+          "penalty": null,
+          "scramble": "R2 D B2 R2 F2 L2 F2 U' B2 F2 R2 B2 R F' D' R U L' R2 D' L'",
+          "note": "",
+          "date": "2024-11-20T17:27:27",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.437,
+          "penalty": null,
+          "scramble": "F2 D' R2 U' R2 U F2 U R2 F2 D F2 B U' R B2 D U B' F2 R",
+          "note": "",
+          "date": "2024-11-20T17:27:48",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.912,
+          "penalty": null,
+          "scramble": "L U' B' L2 F' L2 R2 D2 B L2 U2 F' D F2 R F' D R D'",
+          "note": "",
+          "date": "2024-11-20T17:28:10",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.678,
+          "penalty": null,
+          "scramble": "U2 L2 U F2 U F2 R2 D L2 R2 U' R U' L' R2 U' B F2 R U2",
+          "note": "",
+          "date": "2025-01-30T11:33:09",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.415,
+          "penalty": null,
+          "scramble": "U R2 D B2 L2 F2 U' R2 U2 L2 F' U2 B' R' F' L2 F' D2 L'",
+          "note": "",
+          "date": "2025-01-30T11:33:28",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.237,
+          "penalty": null,
+          "scramble": "B D F' L B U' F' U D R2 B2 L2 B2 D' L2 D2 L2 D' F' L'",
+          "note": "",
+          "date": "2025-01-30T11:34:18",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.82,
+          "penalty": null,
+          "scramble": "F2 R2 D' B2 L2 R2 D2 R2 D L2 B L' B D2 F U2 B' U' B",
+          "note": "",
+          "date": "2025-01-30T11:35:01",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.506,
+          "penalty": null,
+          "scramble": "D R2 L B2 R2 B D2 L' U D2 L F2 B2 R U2 R' U2 R' F2",
+          "note": "",
+          "date": "2025-02-28T12:07:04",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.003,
+          "penalty": null,
+          "scramble": "R' B2 L2 D L2 U2 F2 U' B2 R2 D2 R2 D F D2 U B' U' R' B' R'",
+          "note": "",
+          "date": "2025-02-28T12:07:27",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.157,
+          "penalty": null,
+          "scramble": "F' R' U2 B2 F2 L2 D L2 R2 U B2 D' U' B' L2 U R' D B' D",
+          "note": "",
+          "date": "2025-02-28T12:07:50",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 15.6,
+          "penalty": null,
+          "scramble": "F B2 U F D L U2 R F' U2 R2 F' R2 B' L2 F' L2 B2 R'",
+          "note": "",
+          "date": "2025-02-28T12:08:38",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.803,
+          "penalty": null,
+          "scramble": "F U L' U2 L2 D F2 U F2 D F2 R2 U L2 R U2 F R D' F U",
+          "note": "",
+          "date": "2025-11-15T13:20:47",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.483,
+          "penalty": null,
+          "scramble": "R U2 F D2 B2 L2 F' L2 B' U2 L2 D L R2 U L F2 R2 D",
+          "note": "",
+          "date": "2025-11-15T13:21:07",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.425,
+          "penalty": null,
+          "scramble": "D2 B2 D2 F2 R U2 L2 F2 R' F' D2 R' F2 D' F' L D U' R2",
+          "note": "",
+          "date": "2025-11-15T13:22:07",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.284,
+          "penalty": null,
+          "scramble": "L F' U' D' B' D B D2 F2 L F2 U2 R' F2 L2 B2 R' F2 B2 D B'",
+          "note": "",
+          "date": "2025-11-15T13:23:34",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.069,
+          "penalty": null,
+          "scramble": "L F' R B2 L B2 F2 L' F2 R F2 D2 L' B' L' D2 F2 U B2 D",
+          "note": "",
+          "date": "2026-02-15T16:52:46",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.786,
+          "penalty": null,
+          "scramble": "F2 R' B2 R' L2 U2 D' R' B' L2 B2 L2 D2 L2 U2 B2 U' B2 D2",
+          "note": "",
+          "date": "2026-02-15T16:53:15",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.967,
+          "penalty": null,
+          "scramble": "F' D2 L2 D2 B' L2 R2 D2 F' R2 B' U F' D' L B F U2 B R' D2",
+          "note": "",
+          "date": "2026-02-15T16:53:38",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.696,
+          "penalty": null,
+          "scramble": "L B2 R F2 L' R' D2 B2 R D2 R' F L2 D B U' B F2 L'",
+          "note": "",
+          "date": "2026-02-15T16:54:26",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.306,
+          "penalty": null,
+          "scramble": "F R2 U L2 U' F2 U' B2 F2 D U2 F2 L' D2 R U B D' U2 L'",
+          "note": "",
+          "date": "2026-02-15T16:54:50",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.156,
+          "penalty": null,
+          "scramble": "L B2 F L2 R2 D2 R2 B L2 B L2 B2 L2 R' U B' F' R2 F D F'",
+          "note": "",
+          "date": "2026-02-15T16:55:12",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.903,
+          "penalty": null,
+          "scramble": "U2 B2 R2 U R2 U' R2 D2 B2 L2 U R2 F D' U2 B' R' F' U' F'",
+          "note": "",
+          "date": "2026-02-15T16:55:53",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.877,
+          "penalty": null,
+          "scramble": "L' F' U2 B' R2 B' D2 R2 B R2 B R2 U R' B' U' L B2 D2 U' R",
+          "note": "",
+          "date": "2026-02-15T16:56:19",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.632,
+          "penalty": null,
+          "scramble": "R2 U2 F' R2 U2 B U2 B' D2 R2 F' U' F R D U' L' B' F2 D R'",
+          "note": "",
+          "date": "2026-02-15T16:56:54",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.886,
+          "penalty": null,
+          "scramble": "U' L R2 D2 B D2 R2 F' D2 F' R2 D2 R2 D' R B' L D F U2 R'",
+          "note": "",
+          "date": "2026-02-15T16:57:18",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 15.333,
+          "penalty": null,
+          "scramble": "R2 D B L2 D' F U R F2 U B2 U2 F2 D R2 U' R2 B2 R2 F2",
+          "note": "",
+          "date": "2026-02-15T16:57:59",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.576,
+          "penalty": null,
+          "scramble": "U L2 B2 D' B2 U L2 U F2 U R2 B2 L U' L2 B R F L D' B'",
+          "note": "",
+          "date": "2026-02-15T16:58:35",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.326,
+          "penalty": null,
+          "scramble": "D2 B2 L2 D R2 B2 F2 U R2 U' R2 L' U' R2 F L2 B' L' B D2",
+          "note": "",
+          "date": "2026-02-18T20:07:03",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.919,
+          "penalty": null,
+          "scramble": "F R2 B L' F B U F' D F2 B2 R D2 F2 R' F2 B2 L' D2 L' F2",
+          "note": "",
+          "date": "2026-02-18T20:07:23",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.729,
+          "penalty": null,
+          "scramble": "L D' L' F' R' L' B2 D R' L' U2 L F2 U2 B2 L U2 L' D2 B2 U",
+          "note": "",
+          "date": "2026-02-18T20:09:41",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.459,
+          "penalty": null,
+          "scramble": "F' R' F U' R F2 U R2 B D2 F2 L2 F' L2 B2 L2 U2 L2 U2 L'",
+          "note": "",
+          "date": "2026-02-18T20:10:13",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.207,
+          "penalty": null,
+          "scramble": "U' R' B2 U' L2 F2 U' B2 D F2 L2 D' F2 R U' F' U F' L2 B' F",
+          "note": "",
+          "date": "2026-02-18T20:10:33",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.471,
+          "penalty": null,
+          "scramble": "D2 R' D2 B2 L2 B2 L B2 U2 L U' F2 R D' U' F' D U2 L'",
+          "note": "",
+          "date": "2026-02-18T20:10:56",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.871,
+          "penalty": null,
+          "scramble": "F' R' B2 U2 R' B2 L2 R' B2 R' B2 U2 B' U2 R D R2 F2 D2 F2",
+          "note": "",
+          "date": "2026-02-18T20:11:36",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.825,
+          "penalty": null,
+          "scramble": "L2 B2 F2 U' R2 D2 U F2 D' U' R2 F L' R2 U B2 F' U R' D' F'",
+          "note": "",
+          "date": "2026-02-18T20:12:16",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.964,
+          "penalty": null,
+          "scramble": "F2 U2 L2 B L2 U2 F2 U2 F D2 U2 B2 D' B' L' B R' U2 F2 U L'",
+          "note": "",
+          "date": "2026-02-18T20:12:47",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.535,
+          "penalty": null,
+          "scramble": "B D2 F U' F D2 R' L' B R2 U2 F R2 F D2 B' U2 B D2 L",
+          "note": "",
+          "date": "2026-02-18T20:13:21",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.302,
+          "penalty": null,
+          "scramble": "D' L' U2 F2 R' B' L U' R U2 L U2 L' F2 U2 R' D2 B2 R2 B'",
+          "note": "",
+          "date": "2026-03-07T16:36:41",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 14.26,
+          "penalty": null,
+          "scramble": "U F' B2 R2 U' R2 F2 U' L2 D L' B' R F L U B2 L'",
+          "note": "",
+          "date": "2026-03-07T16:37:44",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 14.98,
+          "penalty": null,
+          "scramble": "U F2 D' B2 L2 B2 D2 F2 R' D' F' L' D' B F' L' B D'",
+          "note": "",
+          "date": "2026-03-07T16:38:09",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.338,
+          "penalty": null,
+          "scramble": "B' L' B2 D2 R' B2 U2 B2 U2 R2 B2 L R' B' L F' L U' R2 F U'",
+          "note": "",
+          "date": "2026-03-07T17:14:31",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.49,
+          "penalty": null,
+          "scramble": "D2 R2 U2 L U2 B2 L U2 L' F2 L D' F' U' F' R F' U' B2 L2",
+          "note": "",
+          "date": "2026-03-07T17:15:04",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.906,
+          "penalty": null,
+          "scramble": "B2 F D2 R2 B2 U' L2 B2 R2 B2 U2 R' B' D' U B L' D' B",
+          "note": "",
+          "date": "2026-03-07T17:15:27",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.323,
+          "penalty": null,
+          "scramble": "U D B' L B' U L' D F' B2 L2 U2 L2 D2 F2 D L2 B2 D",
+          "note": "",
+          "date": "2026-03-07T17:15:47",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.395,
+          "penalty": null,
+          "scramble": "R U F B2 U L U L2 F U2 B2 D L2 U R2 D F2 B2 U'",
+          "note": "",
+          "date": "2026-03-07T17:16:14",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.065,
+          "penalty": null,
+          "scramble": "B R B' D2 B2 D2 L U F2 U2 B' L2 F' D2 B U2 R2 B' U2 L2",
+          "note": "",
+          "date": "2026-03-07T17:16:39",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.209,
+          "penalty": null,
+          "scramble": "L' U2 B U2 B2 R' D2 B2 L F2 R B2 R' B2 D' U L F U R' F'",
+          "note": "",
+          "date": "2026-03-07T17:17:10",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.071,
+          "penalty": null,
+          "scramble": "D2 L U F B R' B' U' R2 D2 R F2 R2 L' F2 B2 L U2 L F",
+          "note": "",
+          "date": "2026-03-07T17:17:30",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.814,
+          "penalty": null,
+          "scramble": "U' B2 L2 B2 F2 R2 U' F2 R2 D B D' U2 L U2 B2 F' U' F L2",
+          "note": "",
+          "date": "2026-03-07T17:33:01",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.114,
+          "penalty": null,
+          "scramble": "F' R2 L' F R' D2 F R2 B' U2 B2 U2 F2 L2 U F2 L2 D2 B2 U'",
+          "note": "",
+          "date": "2026-03-07T17:33:22",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.141,
+          "penalty": null,
+          "scramble": "B' L2 D2 F2 L F2 D F' U' L2 F2 L' B2 R F2 R' U2 D2 F2 D2",
+          "note": "",
+          "date": "2026-03-07T17:33:54",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.707,
+          "penalty": null,
+          "scramble": "L2 B2 D' B2 D F2 U B2 R2 U' R' U' L R' B2 D2 B' D2 F' R'",
+          "note": "",
+          "date": "2026-03-07T17:34:24",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.39,
+          "penalty": null,
+          "scramble": "B' U2 L2 F2 L B2 R F2 R' F2 D2 R D U' B' U' L U' B2 R2",
+          "note": "",
+          "date": "2026-03-07T17:35:15",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.543,
+          "penalty": null,
+          "scramble": "R2 B' D2 B' L2 R2 B2 D2 F L' R D' F' L2 U' B F R' D2",
+          "note": "",
+          "date": "2026-03-07T17:35:42",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.835,
+          "penalty": null,
+          "scramble": "U' D' R F U B2 L U' B2 D B2 U L2 U' B2 U R2 D' B2 R D2",
+          "note": "",
+          "date": "2026-03-15T11:18:29",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.671,
+          "penalty": null,
+          "scramble": "R L2 D2 U L2 F2 D2 B2 D' L2 F2 U2 L' B' R' F' D R' B2 L B'",
+          "note": "",
+          "date": "2026-03-15T11:18:53",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.449,
+          "penalty": null,
+          "scramble": "U2 R L2 D R2 U2 F2 D' L2 U' F2 U2 R2 B L2 R2 U2 B D U2",
+          "note": "",
+          "date": "2026-03-15T11:19:27",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.159,
+          "penalty": null,
+          "scramble": "L' B2 D F2 D B2 L2 U2 B2 R2 U2 L' B U' L2 F U2 L2 D R2",
+          "note": "",
+          "date": "2026-03-15T11:21:02",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.51,
+          "penalty": null,
+          "scramble": "L2 F2 U R2 B2 U2 F2 U F2 U2 L2 D' B' F R' U' R' F2 R B2",
+          "note": "",
+          "date": "2026-03-19T20:45:23",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.661,
+          "penalty": null,
+          "scramble": "R2 L B2 L B' L2 U R' B2 R2 U2 F2 R2 D F2 R2 D L2 D' L'",
+          "note": "",
+          "date": "2026-03-19T20:45:47",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.567,
+          "penalty": null,
+          "scramble": "D2 B2 L U2 L F2 U2 L2 B2 U2 L' R2 D' R B' U2 L2 B2 L' R2 B",
+          "note": "",
+          "date": "2026-03-19T20:46:19",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.916,
+          "penalty": null,
+          "scramble": "R B2 D2 L2 U2 L B2 F2 U2 L U2 F' R U' F R2 F R' U2 B'",
+          "note": "",
+          "date": "2026-03-19T20:47:58",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.124,
+          "penalty": null,
+          "scramble": "U' L F2 B' U F' B2 L D' B2 R2 B2 U R2 U F2 B2 R2 B2 U2 B",
+          "note": "",
+          "date": "2026-03-22T13:57:10",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.57,
+          "penalty": null,
+          "scramble": "F2 R2 U2 B' D2 F R2 B D2 B2 D2 U2 L U' B2 R' F2 L2 R2 U",
+          "note": "",
+          "date": "2026-03-22T13:57:55",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.628,
+          "penalty": null,
+          "scramble": "R2 D2 B L2 F2 R2 B' L2 B' R2 D2 B2 R' D' F' U2 L2 D2 L' B' U",
+          "note": "",
+          "date": "2026-03-22T13:58:15",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.452,
+          "penalty": null,
+          "scramble": "D2 B2 L2 U2 L' U2 B2 L D2 U2 B2 U B' D2 B2 R U L U F",
+          "note": "",
+          "date": "2026-03-22T13:59:16",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.661,
+          "penalty": null,
+          "scramble": "D U L2 R2 U R2 U B2 D B2 R D2 L D' R F' R B",
+          "note": "",
+          "date": "2026-03-22T13:59:38",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.185,
+          "penalty": null,
+          "scramble": "D' R B2 L' B R' F U' B' R' B2 R D2 R2 L D2 R2 D2 F2 R' U2",
+          "note": "",
+          "date": "2026-03-22T14:00:02",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.162,
+          "penalty": null,
+          "scramble": "F2 U2 B' D2 L2 B' R2 U2 B2 F' U2 F R' U B2 D' U2 R' U' B R'",
+          "note": "",
+          "date": "2026-03-22T14:00:37",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.837,
+          "penalty": null,
+          "scramble": "L' B U' R' U D' F2 R' U2 R2 F2 L' B2 L' U2 R'",
+          "note": "",
+          "date": "2026-03-22T14:00:56",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 14.138,
+          "penalty": null,
+          "scramble": "U F' D' B2 F2 R2 U R2 D F2 D' F2 U' B D' R2 U' L R F2 D",
+          "note": "",
+          "date": "2026-03-27T20:34:32",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.449,
+          "penalty": null,
+          "scramble": "L' F R B2 F2 D2 B2 R F2 R D2 R2 U2 D R F' L' B L U2",
+          "note": "",
+          "date": "2026-03-27T20:34:58",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.982,
+          "penalty": null,
+          "scramble": "D' R' U' D B D' F2 R U F L2 D2 B' R2 L2 F' L2 F D2",
+          "note": "",
+          "date": "2026-03-27T20:35:21",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.216,
+          "penalty": null,
+          "scramble": "B U D' B' R' D' L' F R2 U2 F2 U' B2 U' L2 D' L2 U L2 B'",
+          "note": "",
+          "date": "2026-03-27T20:36:16",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.855,
+          "penalty": null,
+          "scramble": "D2 L' D2 L' R' B2 U2 L' D2 U2 R D2 B' R2 D U R2 F' L R U'",
+          "note": "",
+          "date": "2026-03-27T20:36:50",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.408,
+          "penalty": null,
+          "scramble": "R B' L' D2 L U2 B2 L' B2 D2 R U2 B D' U' B U2 L' U",
+          "note": "",
+          "date": "2026-03-27T20:37:11",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.218,
+          "penalty": null,
+          "scramble": "L' F' D' B' U L2 B' L2 U2 B2 D2 B2 D2 L D2 R' L' U2 R2 B U'",
+          "note": "",
+          "date": "2026-03-27T20:38:27",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.756,
+          "penalty": null,
+          "scramble": "U' F' D F2 D' R2 D2 L2 F2 U' B2 U' F2 R' B2 L B2 D' R2 F D2",
+          "note": "",
+          "date": "2026-03-27T20:38:48",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.801,
+          "penalty": null,
+          "scramble": "U L' U' F U' F2 R D' F U2 F2 D2 F2 L2 D2 F U2 B' U2 B",
+          "note": "",
+          "date": "2026-03-27T20:39:23",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.412,
+          "penalty": null,
+          "scramble": "U D2 L2 F2 D2 F' U2 L2 F D2 L2 D B2 R' D U' B D L2",
+          "note": "",
+          "date": "2026-03-27T20:39:47",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.056,
+          "penalty": null,
+          "scramble": "R2 B' R' D R2 D F2 D2 B2 U2 L2 U R' D' B' F' D2 U",
+          "note": "",
+          "date": "2026-03-27T20:40:13",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.915,
+          "penalty": null,
+          "scramble": "D2 R2 B2 U2 R2 F2 D2 B' L2 B' F2 D2 L B D R' D2 U2 F R'",
+          "note": "",
+          "date": "2026-03-27T20:40:35",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.762,
+          "penalty": null,
+          "scramble": "B' F2 U2 R2 D' R2 U2 B2 L2 B2 D' L2 D F R D' L U' F' L2 F2",
+          "note": "",
+          "date": "2026-03-27T20:40:58",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.599,
+          "penalty": null,
+          "scramble": "D R2 B' D' B2 F2 D' B2 D' L2 B2 U' B2 U F L' F U R B R'",
+          "note": "",
+          "date": "2026-03-27T20:41:22",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 16.281,
+          "penalty": null,
+          "scramble": "R2 U L2 F2 D' L D B U' B' R2 B U2 R2 D2 B R2 B L2 B L",
+          "note": "",
+          "date": "2026-03-27T20:42:10",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 14.818,
+          "penalty": null,
+          "scramble": "B2 D R2 U' R2 F2 U' R2 U B2 D2 L D U' B' R U B F' R U'",
+          "note": "",
+          "date": "2026-03-27T20:42:36",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.616,
+          "penalty": null,
+          "scramble": "L2 D2 U2 B' D2 B2 U2 F L2 B' U2 R' B2 D B' U2 L2 U2 B R U2",
+          "note": "",
+          "date": "2026-03-27T20:44:22",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.163,
+          "penalty": null,
+          "scramble": "L D R U L' F2 R F2 D2 B U2 R2 L2 D2 L2 F' B2 L'",
+          "note": "",
+          "date": "2026-03-27T20:45:28",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.481,
+          "penalty": null,
+          "scramble": "F2 R L' U' D F' L F2 D' B2 U' F2 R2 D L2 B2 L2 U' F2 B' R",
+          "note": "",
+          "date": "2026-03-27T20:46:53",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.836,
+          "penalty": null,
+          "scramble": "B U F' R' B R2 B L' U' B2 R2 F2 R2 U R2 F2 D2 B2 D' F2 R",
+          "note": "",
+          "date": "2026-03-27T20:47:13",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.995,
+          "penalty": null,
+          "scramble": "B2 U L2 F U2 F R2 U2 R2 B2 L2 U2 F D' F2 R' F R2 U2 L",
+          "note": "",
+          "date": "2026-03-27T20:48:45",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 20.02,
+          "penalty": null,
+          "scramble": "B D' F' B2 U B2 F2 R2 D R2 D2 B2 L2 D2 B' U R D B2 U2 R'",
+          "note": "",
+          "date": "2026-03-27T20:49:25",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.08,
+          "penalty": null,
+          "scramble": "R D B U2 F L D' F' R U D B2 U' F2 D' B2 R2 L2 D F2 B2",
+          "note": "",
+          "date": "2026-03-27T20:50:35",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 8.964,
+          "penalty": null,
+          "scramble": "U R2 U R2 U' F2 R2 D' L2 R2 D' R F D2 B' D F D2 R U' R",
+          "note": "",
+          "date": "2026-03-27T20:51:01",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.498,
+          "penalty": null,
+          "scramble": "B R' U F' B R F R U' F2 R2 F2 L' F2 B2 U2 R2 L B2 R' B",
+          "note": "",
+          "date": "2026-03-27T20:51:20",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.657,
+          "penalty": null,
+          "scramble": "U R2 B R2 U2 F U2 B2 D2 F' U2 F' L B' U' L B2 L' D' R'",
+          "note": "",
+          "date": "2026-03-27T20:51:48",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 9.834,
+          "penalty": null,
+          "scramble": "F2 L' D2 L2 F' D2 U2 F2 L2 F2 L2 F' U' B F' D' R' F2 R2",
+          "note": "",
+          "date": "2026-04-12T11:49:57",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.509,
+          "penalty": null,
+          "scramble": "B2 U2 R' U2 B2 F2 L B2 L' R' D L' U F D' R' B' D F2",
+          "note": "",
+          "date": "2026-04-12T11:50:18",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.155,
+          "penalty": null,
+          "scramble": "D' U2 L2 B L2 R2 B D2 B U2 L2 U2 R B2 D' R' D' L' U2",
+          "note": "",
+          "date": "2026-04-12T11:50:53",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.294,
+          "penalty": null,
+          "scramble": "F' U' F2 D2 F' R2 B2 F' R2 F2 U2 L2 U2 R' U L' D2 F' D2 B",
+          "note": "",
+          "date": "2026-04-12T11:51:22",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.394,
+          "penalty": null,
+          "scramble": "D F2 U' F2 D B2 D2 B2 R2 U2 L2 U2 R' U2 B U2 B R F D' R2",
+          "note": "",
+          "date": "2026-04-12T11:52:11",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.019,
+          "penalty": null,
+          "scramble": "F D B2 F2 L2 D L2 F2 L2 U2 L2 D2 F' L B' L D L F R2",
+          "note": "",
+          "date": "2026-04-12T11:53:30",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.729,
+          "penalty": null,
+          "scramble": "D' U2 L2 D2 B' F' U2 B' R2 B' R2 U2 L' D' U' B2 L F2 R' B' F2",
+          "note": "",
+          "date": "2026-04-12T11:54:02",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 13.342,
+          "penalty": null,
+          "scramble": "R F U F B' R' U F' B2 L2 B2 R2 D B2 D' R2 D' B2 U F",
+          "note": "",
+          "date": "2026-04-12T12:00:27",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.268,
+          "penalty": null,
+          "scramble": "F' B2 D F2 R2 U' R2 F2 D2 F2 D2 U2 L' U' F' D' B' D2 R2 F2",
+          "note": "",
+          "date": "2026-04-12T12:00:52",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 10.687,
+          "penalty": null,
+          "scramble": "F2 U B2 R L2 B' U R L2 F2 L' U2 L D2 B2 U2 R' U2 B R2",
+          "note": "",
+          "date": "2026-04-12T12:01:17",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.227,
+          "penalty": null,
+          "scramble": "F2 U R2 U' R2 U2 F2 D R2 F2 U2 R D2 L' B L F R' B' D'",
+          "note": "",
+          "date": "2026-04-12T12:02:04",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 11.884,
+          "penalty": null,
+          "scramble": "B L2 F' U L' U' D' L D2 R' F2 R D2 R2 U2 F2 U2 F2 D2",
+          "note": "",
+          "date": "2026-04-12T12:02:28",
+          "puzzle": "3x3"
+        },
+        {
+          "time": 12.974264500000572,
+          "penalty": null,
+          "scramble": "L2  F  L'  B2  F  R'  F  R'  B'  L  U2  D'  F  L  D'  R'  F'  B  U'  L",
+          "puzzle": "3x3",
+          "date": "2026-05-31T22:34:03.076294"
+        },
+        {
+          "time": 15.960980900003051,
+          "penalty": null,
+          "scramble": "L2  B2  R  F  R'  B'  R  F  L  F2  B'  L2  R  U'  F'  D  F  B  R'  D2",
+          "puzzle": "3x3",
+          "date": "2026-05-31T22:38:43.197980"
+        },
+        {
+          "time": 11.50104650000003,
+          "penalty": null,
+          "scramble": "F'  U  B'  F2  L'  R2  D  B  U2  D2  B  U'  B  L'  U'  L  B'  L'  B2  U",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:32:17.910281"
+        },
+        {
+          "time": 12.854364800000099,
+          "penalty": null,
+          "scramble": "R'  F'  R'  B2  D  L'  B2  R'  U  D'  R  L2  B2  F'  R  D  L  F2  D'  R2",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:33:22.541519"
+        },
+        {
+          "time": 10.078978499999948,
+          "penalty": null,
+          "scramble": "U  L  D  B'  U2  B2  F  R2  F  D  U2  L  U2  B2  U'  F  L2  B'  F'  D'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:33:43.700541"
+        },
+        {
+          "time": 12.079500300000063,
+          "penalty": null,
+          "scramble": "R2  D'  U2  L  B2  L'  F'  U'  F'  D  L2  B'  L'  B2  R'  D'  F'  U2  F2  R",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:34:08.978568"
+        },
+        {
+          "time": 10.439786200000071,
+          "penalty": null,
+          "scramble": "L2  D'  F2  L2  D2  L2  R  U2  F2  R  F  R  F'  B'  U2  B'  L  F'  R'  D'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:35:08.173416"
+        },
+        {
+          "time": 12.15112750000003,
+          "penalty": null,
+          "scramble": "L2  B  U'  B'  F2  R  U2  L  B  R  B'  D'  L'  R  B  R'  L2  F2  B  R2",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:35:37.988096"
+        },
+        {
+          "time": 9.229749899999888,
+          "penalty": null,
+          "scramble": "R'  D  B  L  R  F'  R'  D  L2  R'  F2  D2  R'  L2  U2  L'  R2  B  F2  L'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:35:59.990261"
+        },
+        {
+          "time": 13.103388300000006,
+          "penalty": null,
+          "scramble": "U2  L'  B  D  U'  R2  F  R2  F2  R'  F2  B  R  U2  L'  U'  B  R  U  D2",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:36:26.949395"
+        },
+        {
+          "time": 11.68760169999996,
+          "penalty": null,
+          "scramble": "U2  R2  U'  L  F2  B2  U2  B  D'  L  R2  B2  L'  F'  L'  R'  U'  F2  U2  B'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:36:50.750555"
+        },
+        {
+          "time": 9.47697160000007,
+          "penalty": null,
+          "scramble": "L  R2  U'  D2  B  R'  L'  D  U2  R'  U'  L  F2  U  L  B'  R2  U'  R  L'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:37:48.685087"
+        },
+        {
+          "time": 9.690661300000102,
+          "penalty": null,
+          "scramble": "L  D2  F2  D'  B2  U2  R'  D2  R  F2  L'  D  L2  F  R2  D  U'  F'  B  R",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:38:14.403659"
+        },
+        {
+          "time": 11.456258800000114,
+          "penalty": null,
+          "scramble": "U  R2  U  D'  B  R2  D'  B'  F'  D2  F2  R  L  B2  U  R  U  B2  L2  R'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T18:38:36.402935"
+        },
+        {
+          "time": 11.31905310000002,
+          "penalty": null,
+          "scramble": "L'  D  F2  L2  U'  B2  U  L  B  R  D'  U2  F'  R2  U2  R2  L2  D'  B  R'",
+          "puzzle": "3x3",
+          "date": "2026-06-02T20:42:07.679988"
+        },
+        {
+          "time": 14.165999000000284,
+          "penalty": null,
+          "scramble": "R'  F2  B'  U  R  L'  B2  R  D2  B  F  L'  U2  F2  R2  B  R  L  U'  D'",
+          "puzzle": "3x3",
+          "date": "2026-06-05T18:13:39.211757"
+        },
+        {
+          "time": 18.758501199999955,
+          "penalty": null,
+          "scramble": "D  L  F2  R'  B'  L  F'  R  F'  D  F2  R  F'  B  U2  L'  D2  L  R  U2",
+          "puzzle": "3x3",
+          "date": "2026-06-05T18:14:07.737838"
+        },
+        {
+          "time": 9.566826300000685,
+          "penalty": null,
+          "scramble": "L'  B  L  B2  L2  U'  L'  F'  U  D  R'  D'  R  D'  F2  D'  R  B'  U'  R'",
+          "puzzle": "3x3",
+          "date": "2026-06-06T16:41:58.230230"
+        },
+        {
+          "time": 9.499838100000488,
+          "penalty": null,
+          "scramble": "F2  R  F'  D2  B  L'  B'  D'  B  R2  B'  U2  F2  R  B  L'  U2  B'  L'  F",
+          "puzzle": "3x3",
+          "date": "2026-06-06T16:42:16.176561"
+        },
+        {
+          "time": 8.750395799999978,
+          "penalty": null,
+          "scramble": "F  U2  F  U  R  U  F'  L'  U'  R  U2  B  F'  D2  F  U2  R'  D2  B2  F'",
+          "puzzle": "3x3",
+          "date": "2026-06-07T15:02:25.837445"
+        },
+        {
+          "time": 10.446929299999965,
+          "penalty": null,
+          "scramble": "F'  R'  D  B'  F'  R  F'  D2  B2  L  F'  U'  R'  B  F'  D2  F'  R  L2  U'",
+          "puzzle": "3x3",
+          "date": "2026-06-07T15:03:04.564865"
+        },
+        {
+          "time": 10.604076000000077,
+          "penalty": null,
+          "scramble": "F'  B2  D  R  L'  F  L  F'  B  R'  B'  U  D  F'  D'  U2  L2  U  L2  B2",
+          "puzzle": "3x3",
+          "date": "2026-06-07T15:03:27.078071"
+        },
+        {
+          "time": 11.107419899999968,
+          "penalty": null,
+          "scramble": "F2  L  B'  U2  L  R'  U  F  L  R  B  L'  D  B2  L2  F'  R2  L'  D2  L'",
+          "puzzle": "3x3",
+          "date": "2026-06-07T15:10:41.453670"
+        },
+        {
+          "time": 12.273321399999986,
+          "penalty": null,
+          "scramble": "F2  B  R2  U2  R'  L  F'  R'  D'  L  U'  R'  L'  F'  R  D'  U2  B'  R'  U'",
+          "puzzle": "3x3",
+          "date": "2026-06-07T15:11:10.984726"
+        },
+        {
+          "time": 10.247072000000117,
+          "penalty": null,
+          "scramble": "U2  D2  R2  B2  L'  R'  F  R'  U2  F  B2  D'  R2  F'  U2  B2  U2  R2  B2  D",
+          "puzzle": "3x3",
+          "date": "2026-06-18T20:47:36.737001"
+        },
+        {
+          "time": 11.536197899999024,
+          "penalty": null,
+          "scramble": "F'  D'  L2  R'  B  R'  L2  U'  F  R'  U  L'  U2  F'  R  D  L  B  R2  L2",
+          "puzzle": "3x3",
+          "date": "2026-06-18T20:48:05.905953"
+        },
+        {
+          "time": 9.695817300000272,
+          "penalty": null,
+          "scramble": "B  D  F'  L  U  F'  U2  F  R'  U2  B2  D'  L  D  R2  U2  B2  F'  L  U",
+          "puzzle": "3x3",
+          "date": "2026-06-18T20:48:25.799740"
+        },
+        {
+          "time": 10.196990199998254,
+          "penalty": null,
+          "scramble": "L  B2  D2  B2  F  R2  U  B  L'  R  D  U2  F'  L2  F2  R2  B2  R2  D2  U",
+          "puzzle": "3x3",
+          "date": "2026-06-18T20:48:45.886603"
+        },
+        {
+          "time": 8.266465200000312,
+          "penalty": null,
+          "scramble": "R  D'  B2  R2  L  D  L  U2  F2  U'  R2  F2  R'  U  D2  L  R  D2  L'  B'",
+          "puzzle": "3x3",
+          "date": "2026-06-18T20:49:04.756074"
+        },
+        {
+          "time": 14.742739999999685,
+          "penalty": null,
+          "scramble": "L  U2  F'  B'  D2  F  L2  R  B  U  D'  R'  D'  U'  F2  B'  D2  B2  F2  U'",
+          "puzzle": "3x3",
+          "date": "2026-06-18T20:49:35.034808"
+        },
+        {
+          "time": 13.032418199999938,
+          "penalty": null,
+          "scramble": "D2  B  L2  D2  R'  L2  D  U2  B2  L'  D2  L  B  U'  B  R2  L  D  F'  D2",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:04:40.906750"
+        },
+        {
+          "time": 10.3579479,
+          "penalty": null,
+          "scramble": "L'  R  D2  R'  U'  L'  U  L2  B'  L  U'  D'  L2  B'  F  D  L  F  D'  L",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:05:01.820089"
+        },
+        {
+          "time": 9.669236800000363,
+          "penalty": null,
+          "scramble": "D2  U2  F'  D  U2  F'  B  L'  D'  U'  F  D  R2  F2  D2  L2  D  F2  D  F",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:05:21.786320"
+        },
+        {
+          "time": 10.01586589999988,
+          "penalty": null,
+          "scramble": "F2  D  R  U2  D2  B'  L'  U'  L'  U'  F2  U  R2  B'  D'  L  U'  B  D  B",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:06:00.033554"
+        },
+        {
+          "time": 9.265766299999996,
+          "penalty": null,
+          "scramble": "B2  D'  B'  U2  D2  L2  U2  R'  D'  F2  U2  F2  B'  U'  L'  B2  F'  R2  U'  F2",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:06:45.264550"
+        },
+        {
+          "time": 9.781884499999705,
+          "penalty": null,
+          "scramble": "B2  L'  B  F2  U  R2  F'  B  D2  U  B'  R2  L  D2  U2  L2  B2  D2  L'  F'",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:07:16.625006"
+        },
+        {
+          "time": 14.482627200000024,
+          "penalty": null,
+          "scramble": "U  B  R'  U  D  B'  L'  D2  F2  R'  B'  D2  R'  U'  B2  L  F2  B2  U  F",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:07:58.012457"
+        },
+        {
+          "time": 12.104211599999871,
+          "penalty": null,
+          "scramble": "U'  R  D2  L2  B2  U  B'  R2  L2  F  L'  U  L'  U2  L2  R  U2  D2  F2  L2",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:08:21.635116"
+        },
+        {
+          "time": 9.871022499999981,
+          "penalty": null,
+          "scramble": "R'  F2  B'  L2  D'  R2  F'  U'  F'  R2  F'  D  L  U2  R'  L'  B  L2  B2  R",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:08:48.831326"
+        },
+        {
+          "time": 9.781681800000115,
+          "penalty": null,
+          "scramble": "U  D2  R  F  L  R  U'  F  R2  F  B'  L'  R  B  D  B'  L'  U2  D2  F'",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:09:32.847988"
+        },
+        {
+          "time": 9.682757800000218,
+          "penalty": null,
+          "scramble": "L'  R2  B2  R'  B2  R'  D  F  L  R2  B  D  B2  U2  D'  F2  B2  D2  F  D",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:10:02.045360"
+        },
+        {
+          "time": 9.983792499999709,
+          "penalty": null,
+          "scramble": "U2  F'  D2  R2  U  L  D'  R'  F  R2  F2  L'  R'  B'  D'  F'  L2  R  U'  R'",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:10:25.484877"
+        },
+        {
+          "time": 12.465298899999652,
+          "penalty": null,
+          "scramble": "D  F'  L  F2  L'  B  R  D  R2  F'  R'  F  L2  F2  R'  D2  F'  B'  U  R2",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:10:50.263913"
+        },
+        {
+          "time": 10.552832500000022,
+          "penalty": null,
+          "scramble": "L2  B  R2  B  L2  R2  F2  R2  D2  L  R2  D  B'  U2  L'  U  L'  D2  U'  F",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:11:17.211565"
+        },
+        {
+          "time": 12.840395000000171,
+          "penalty": null,
+          "scramble": "R  B2  L2  U  B2  L  D  B'  D  B2  R2  L  U'  D'  R  L2  U2  L'  F'  L2",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:11:48.133939"
+        },
+        {
+          "time": 11.882983999999851,
+          "penalty": null,
+          "scramble": "L2  B  U2  D2  R'  F'  R  B  R2  D2  F2  B2  D2  L2  B2  R2  U  B2  L'  R",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:12:26.109218"
+        },
+        {
+          "time": 9.892810199999985,
+          "penalty": null,
+          "scramble": "D  U2  B  D  U2  F  U  R2  U  R'  L'  D  R2  D'  B'  U  R'  B2  R  U",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:12:50.952920"
+        },
+        {
+          "time": 12.10936670000001,
+          "penalty": null,
+          "scramble": "L  D  F2  U'  R2  D2  U2  F2  R  D  F'  U'  L  F'  B  D2  R2  U  D  B2",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:13:14.994885"
+        },
+        {
+          "time": 10.518042499999865,
+          "penalty": null,
+          "scramble": "D2  F  R2  U2  L  R2  D  U2  F'  L'  B'  D  L  D'  L  F'  B'  D2  L  U'",
+          "puzzle": "3x3",
+          "date": "2026-06-19T20:13:46.002014"
+        },
+        {
+          "time": 11.774263000000019,
+          "penalty": null,
+          "scramble": "F  R2  U  R'  B2  F'  R2  D  R'  D'  R  F2  L'  F'  U2  F'  R  U  R2  D2",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:03:32.124029"
+        },
+        {
+          "time": 10.33692300000007,
+          "penalty": null,
+          "scramble": "F'  D2  F'  U'  L'  D2  R  U2  D  L2  D'  U'  R'  F  U2  D  L'  R  B2  L2",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:05:00.202650"
+        },
+        {
+          "time": 11.406857200000104,
+          "penalty": null,
+          "scramble": "U  R  U2  R2  U2  L2  B'  D'  B'  D2  F  R'  B  R'  F'  D2  F  U  L'  U'",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:06:25.227935"
+        },
+        {
+          "time": 11.814833100000214,
+          "penalty": null,
+          "scramble": "U2  R2  L  D2  F'  B'  U2  F2  B2  U'  F'  U'  F'  R'  L2  D2  F  U'  D  B",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:07:03.720591"
+        },
+        {
+          "time": 10.89010129999997,
+          "penalty": null,
+          "scramble": "B'  U  B'  R  U  F  L'  F2  B2  R  F  R'  L  B2  R  F  B  L  R  B'",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:07:23.755071"
+        },
+        {
+          "time": 9.847103999999945,
+          "penalty": null,
+          "scramble": "D'  L2  B  L  F2  L  R2  B'  R  U'  D2  F  L'  D2  L2  D  F'  D  B'  F'",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:08:21.173383"
+        },
+        {
+          "time": 8.549575099999856,
+          "penalty": null,
+          "scramble": "U'  B'  D2  U  R2  L'  F2  L2  F  R2  U  R  F  D  F  B'  D'  R'  B  L'",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:08:48.723756"
+        },
+        {
+          "time": 8.237402100000054,
+          "penalty": null,
+          "scramble": "R2  U2  R'  F2  R  F  U'  F  D2  R'  B  U  B  U  L  D'  R  L'  F  B'",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:09:09.427745"
+        },
+        {
+          "time": 9.436239999999998,
+          "penalty": null,
+          "scramble": "R2  B'  R'  D  L2  U'  L'  B  U'  R2  U  F'  D2  U2  F'  R  B  U'  R'  F'",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:10:39.434534"
+        },
+        {
+          "time": 13.117517300000145,
+          "penalty": null,
+          "scramble": "L  R2  B  D  U2  R2  B2  L'  D'  F'  D2  L  B  R2  D  F2  R  L  B2  D",
+          "puzzle": "3x3",
+          "date": "2026-06-20T11:11:04.943130"
+        },
+        {
+          "time": 9.761820799999896,
+          "penalty": null,
+          "scramble": "B  D'  U'  R  B'  D2  L'  F'  B  R  D  B  D'  U  B  R  B2  L2  F'  U2",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:29:22.744171"
+        },
+        {
+          "time": 7.017536100000143,
+          "penalty": null,
+          "scramble": "F  R  F'  B'  L2  U'  L  D  F  B  L2  F'  R2  F  R  D  R'  L  U'  D",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:29:44.914397"
+        },
+        {
+          "time": 9.796010300000034,
+          "penalty": null,
+          "scramble": "D2  B2  F'  L2  U'  L'  B  R'  B2  F  L'  R  D'  L'  D'  R'  B  R  U  F",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:30:06.405681"
+        },
+        {
+          "time": 9.146655900000042,
+          "penalty": null,
+          "scramble": "B  F2  R'  L'  D2  B2  U'  B'  R'  L  B  F'  L'  U'  D2  F2  U  R  F'  D",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:31:16.189352"
+        },
+        {
+          "time": 8.962390900000173,
+          "penalty": null,
+          "scramble": "R'  B2  F  D  L  U  F2  L2  D2  R2  D2  U'  R2  U  F  L  U2  R'  L2  B2",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:31:41.371472"
+        },
+        {
+          "time": 9.46455369999967,
+          "penalty": null,
+          "scramble": "R'  F2  U'  D'  R2  D2  R2  D  B2  F  R'  U  F'  R  U  R'  B2  R'  L2  B'",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:33:43.925130"
+        },
+        {
+          "time": 9.369719799999984,
+          "penalty": null,
+          "scramble": "F2  U'  B'  D  B'  R  D  F  R  L  B'  F  L  U2  B2  F  R  B'  L  D'",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:36:26.957490"
+        },
+        {
+          "time": 9.245226799999728,
+          "penalty": null,
+          "scramble": "D'  B2  R  L2  B'  D2  R2  D  L  D2  F  B  U2  B  F2  D2  R'  B  D'  U",
+          "puzzle": "3x3",
+          "date": "2026-06-27T14:37:31.798942"
+        }
+      ]
+    },
+    "skewb": {
+      "puzzle": "Skewb",
+      "times": [
+        {
+          "time": 5.607480300000134,
+          "penalty": null,
+          "scramble": "R  L  B  L  R  B'  R'  B  U",
+          "puzzle": "Skewb",
+          "date": "2026-06-20T11:13:58.662694"
+        },
+        {
+          "time": 4.781915000000026,
+          "penalty": null,
+          "scramble": "R  U'  L  U  R  L'  B'  R  L",
+          "puzzle": "Skewb",
+          "date": "2026-06-20T11:14:13.185451"
+        },
+        {
+          "time": 6.821319900000162,
+          "penalty": null,
+          "scramble": "B  U  R'  B  U'  L'  R'  B  U'",
+          "puzzle": "Skewb",
+          "date": "2026-06-20T11:14:27.883799"
+        },
+        {
+          "time": 4.94789449999962,
+          "penalty": null,
+          "scramble": "L'  U  L  U  R'  B  L  B'  R",
+          "puzzle": "Skewb",
+          "date": "2026-06-20T11:14:41.511568"
+        },
+        {
+          "time": 5.694919600000048,
+          "penalty": null,
+          "scramble": "U'  L'  B'  L  R  B'  R  U  B'",
+          "puzzle": "Skewb",
+          "date": "2026-06-20T11:14:59.025808"
+        },
+        {
+          "time": 5.5138057000003755,
+          "penalty": null,
+          "scramble": "L  R'  B'  L'  B'  R'  U  L  U",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:19:10.383318"
+        },
+        {
+          "time": 5.233040600000095,
+          "penalty": null,
+          "scramble": "U'  L'  U'  B'  R'  B'  U  L'  B'",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:19:23.788748"
+        },
+        {
+          "time": 5.0580641999986256,
+          "penalty": null,
+          "scramble": "L'  B  U'  B  L'  U  L  R  B'",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:19:54.586532"
+        },
+        {
+          "time": 5.442945100001452,
+          "penalty": null,
+          "scramble": "U'  L  R'  B  U  B  R'  L  U'",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:20:10.780405"
+        },
+        {
+          "time": 6.038333200000125,
+          "penalty": null,
+          "scramble": "L  R  B'  L'  U  R  U'  L  R",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:20:28.378653"
+        },
+        {
+          "time": 5.727865400000155,
+          "penalty": null,
+          "scramble": "U'  L'  U'  L  R'  U  L  R  U'",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:20:54.349174"
+        },
+        {
+          "time": 5.099267900000996,
+          "penalty": null,
+          "scramble": "R  B  U  R  L'  U  L'  B  R'",
+          "puzzle": "Skewb",
+          "date": "2026-06-23T21:21:08.172051"
+        }
+      ]
+    }
+  }
+}
