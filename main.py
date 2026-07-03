@@ -45,7 +45,7 @@ import tkinter.messagebox as mb
 from utils import fmt, display, effective, _bring_to_front, _HAS_WINSOUND, _winsound
 from scramble import PUZZLES
 from persistence import BASE_DIR, DATA_DIR, DATA_FILE, CFG_FILE, ICON_FILE, Config, Sessions
-from hardware_timer import MoyuInput, _load_sounddevice
+from hardware_timer import MoyuInput, _load_sounddevice, _moyu_mode
 
 # matplotlib is only used inside the Tools window (charts + histogram).  Importing
 # it eagerly adds ~500 ms to the cold startup — instead we load it lazily the
