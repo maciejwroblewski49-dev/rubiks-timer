@@ -10,6 +10,8 @@ import tkinter.messagebox as mb
 from utils import _bring_to_front, fmt, effective
 from persistence import Config, Sessions, DATA_FILE, CFG_FILE, DATA_DIR
 from hardware_timer import MoyuInput
+from ui.theme import ACCENTS
+from ui.layout import PANELS, PANEL_NAMES, PRESETS
 
 
 FONT_FAMILIES = [
@@ -104,8 +106,9 @@ class SettingsWindow(ctk.CTkToplevel):
     def __init__(self, parent, cfg: Config, sm: Sessions, on_change, on_session_reload):
         super().__init__(parent)
         self.title("Ustawienia")
-        self.geometry("620x560")
-        self.resizable(False, False)
+        self.geometry("680x600")
+        self.minsize(600, 480)
+        self.resizable(True, True)
         self.cfg = cfg
         self.sm  = sm
         self.on_change        = on_change
@@ -116,9 +119,11 @@ class SettingsWindow(ctk.CTkToplevel):
     def _build(self):
         tabs = ctk.CTkTabview(self, anchor="nw")
         tabs.pack(fill="both", expand=True, padx=10, pady=10)
-        for t in ["🎨  Wygląd", "⏱  Timer", "🔌  Timer audio", "📊  Statystyki", "💾  Dane"]:
+        self._tabs = tabs
+        for t in ["🎨  Wygląd", "🧩  Układ", "⏱  Timer", "🔌  Timer audio", "📊  Statystyki", "💾  Dane"]:
             tabs.add(t)
         self._tab_appearance(tabs.tab("🎨  Wygląd"))
+        self._tab_layout(tabs.tab("🧩  Układ"))
         self._tab_timer(tabs.tab("⏱  Timer"))
         self._tab_moyu(tabs.tab("🔌  Timer audio"))
         self._tab_stats(tabs.tab("📊  Statystyki"))
@@ -371,10 +376,112 @@ class SettingsWindow(ctk.CTkToplevel):
         ctk.CTkSlider(sf, from_=10, to=28, variable=ssv,
                       command=on_ssize, width=170).grid(row=22, column=1, padx=6)
 
+        self._section(sf, 23, "── Kolor akcentu (przyciski, wyróżnienia) ──")
+        ctk.CTkLabel(sf, text="Akcent", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=24, column=0, sticky="w", padx=14, pady=6)
+        acc_row = ctk.CTkFrame(sf, fg_color="transparent")
+        acc_row.grid(row=24, column=1, columnspan=3, sticky="w", padx=8, pady=6)
+        def _set_acc(name):
+            self.cfg.s("accent", name); self.on_change()
+        for name, (light, dark) in ACCENTS.items():
+            ctk.CTkButton(acc_row, text="", width=26, height=26, corner_radius=13,
+                          fg_color=dark, hover_color=light,
+                          command=lambda n=name: _set_acc(n)).pack(side="left", padx=2)
+
+    # ── Układ ─────────────────────────────────────────────────────
+
+    def _scroll(self, tab):
+        sf = ctk.CTkScrollableFrame(tab, fg_color="transparent")
+        sf.pack(fill="both", expand=True)
+        sf.grid_columnconfigure(0, weight=1)
+        return sf
+
+    def _tab_layout(self, tab):
+        sf = self._scroll(tab)
+        app = self.master
+
+        self._section(sf, 0, "── Układ okna ───────────────────────")
+        ctk.CTkLabel(sf, text="Gotowy układ", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=1, column=0, sticky="w", padx=14, pady=6)
+        cur = self.cfg.g("layout", "preset")
+        pv = ctk.StringVar(value=cur if cur in PRESETS else list(PRESETS)[0])
+        def on_preset(v):
+            app.layout.load_preset(v)
+            _sync_vis()
+        ctk.CTkOptionMenu(sf, variable=pv, values=list(PRESETS), width=190,
+                          command=on_preset).grid(row=1, column=1, columnspan=2, sticky="w", padx=8)
+        def edit_now():
+            self.destroy()
+            if not app.layout.editing:
+                app._toggle_layout_edit()
+        ctk.CTkButton(sf, text="✥  Przesuń panele myszką…", width=220,
+                      command=edit_now).grid(row=2, column=0, sticky="w", padx=14, pady=(4, 6))
+        ctk.CTkLabel(sf, text="Skrót: L  ·  w trybie edycji przeciągasz panel za belkę, a róg ◢ zmienia jego rozmiar",
+                     font=ctk.CTkFont(size=11), text_color="gray55", anchor="w"
+                     ).grid(row=3, column=0, columnspan=3, sticky="w", padx=14)
+
+        self._section(sf, 4, "── Widoczne panele ──────────────────")
+        vis_vars = {}
+        for i, pid in enumerate(PANELS):
+            ctk.CTkLabel(sf, text=PANEL_NAMES[pid], font=ctk.CTkFont(size=13),
+                         anchor="w").grid(row=5 + i, column=0, sticky="w", padx=14, pady=4)
+            v = ctk.BooleanVar(value=app.layout.visible(pid))
+            vis_vars[pid] = v
+            ctk.CTkSwitch(sf, variable=v, text="",
+                          command=lambda p=pid, var=v: (app.layout.set_visible(p, var.get()), _sync_vis())
+                          ).grid(row=5 + i, column=1, sticky="w", padx=8)
+        def _sync_vis():
+            for p, var in vis_vars.items():
+                var.set(app.layout.visible(p))
+
+        self._section(sf, 11, "── Wygląd paneli ────────────────────")
+        def _slider(row, label, key, lo, hi):
+            ctk.CTkLabel(sf, text=label, font=ctk.CTkFont(size=13),
+                         anchor="w").grid(row=row, column=0, sticky="w", padx=14, pady=6)
+            var = ctk.IntVar(value=int(self.cfg.g("layout", key)))
+            lb = ctk.CTkLabel(sf, text=f"{var.get()} px", width=44)
+            lb.grid(row=row, column=2, padx=4)
+            def on(v):
+                val = int(float(v)); var.set(val); lb.configure(text=f"{val} px")
+                self.cfg.s("layout", key, val); self.on_change()
+            ctk.CTkSlider(sf, from_=lo, to=hi, number_of_steps=hi - lo, variable=var,
+                          command=on, width=170).grid(row=row, column=1, padx=6)
+        _slider(12, "Odstęp między panelami", "gap", 0, 24)
+        _slider(13, "Zaokrąglenie rogów", "radius", 0, 24)
+        self._switch_row(sf, 14, "Ramki paneli", "layout", "borders")
+        self._switch_row(sf, 15, "Przyciąganie do krawędzi przy przesuwaniu", "layout", "snap")
+
+        self._section(sf, 16, "── Lista czasów ─────────────────────")
+        ctk.CTkLabel(sf, text="Kolumny", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=17, column=0, sticky="w", padx=14, pady=6)
+        cf = ctk.CTkFrame(sf, fg_color="transparent")
+        cf.grid(row=17, column=1, columnspan=3, sticky="w", padx=8)
+        def on_col(key, var):
+            cols = [c for c in ("ao5", "ao12", "ao50", "ao100")
+                    if (var.get() if c == key else c in self.cfg.g("times_list", "columns"))]
+            self.cfg.s("times_list", "columns", cols); self.on_change()
+        for key in ("ao5", "ao12", "ao50", "ao100"):
+            v = ctk.BooleanVar(value=key in self.cfg.g("times_list", "columns"))
+            ctk.CTkCheckBox(cf, text=key, variable=v, width=70,
+                            command=lambda k=key, var=v: on_col(k, var)).pack(side="left", padx=(0, 6))
+
+        ctk.CTkLabel(sf, text="Wysokość wierszy", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=18, column=0, sticky="w", padx=14, pady=6)
+        dens = {"Kompaktowe": "compact", "Normalne": "normal", "Duże": "comfy"}
+        drev = {v: k for k, v in dens.items()}
+        dv = ctk.StringVar(value=drev.get(self.cfg.g("times_list", "density"), "Normalne"))
+        ctk.CTkSegmentedButton(sf, values=list(dens), variable=dv,
+                               command=lambda v: (self.cfg.s("times_list", "density", dens[v]), self.on_change())
+                               ).grid(row=18, column=1, columnspan=2, sticky="w", padx=8)
+        self._switch_row(sf, 19, "Płynne przewijanie", "times_list", "smooth_scroll")
+        self._switch_row(sf, 20, "Wyróżnij najlepszy czas (PB)", "times_list", "highlight_pb")
+        self._switch_row(sf, 21, "Cyfry o stałej szerokości", "times_list", "mono_digits")
+        self._switch_row(sf, 22, "Przy DNF pokazuj też zmierzony czas", "times_list", "show_raw_on_dnf")
+
     # ── Timer ─────────────────────────────────────────────────────
 
     def _tab_timer(self, tab):
-        tab.grid_columnconfigure(0, weight=1)
+        tab = self._scroll(tab)
 
         self._section(tab, 0, "── Inspekcja ─────────────────────────")
         self._switch_row(tab, 1, "Włącz inspekcję przed startem",
@@ -392,6 +499,9 @@ class SettingsWindow(ctk.CTkToplevel):
         self._section(tab, 3, "── Sterowanie ────────────────────────")
         self._switch_row(tab, 4, "Ukryj czas podczas solva (blind mode)",
                          "timer","hide_during_solve")
+        self._section(tab, 15, "── Ekran podczas solva ───────────────")
+        self._switch_row(tab, 16, "Pokazuj tylko timer (chowaj resztę paneli)",
+                         "timer", "hide_ui_while_solving")
 
         ctk.CTkLabel(tab, text="Opóźnienie startu", font=ctk.CTkFont(size=13),
                      anchor="w").grid(row=5, column=0, sticky="w", padx=14, pady=6)
@@ -418,6 +528,8 @@ class SettingsWindow(ctk.CTkToplevel):
         ctk.CTkOptionMenu(tab, variable=rfv,
                           values=["16 ms","30 ms","50 ms","100 ms","200 ms"],
                           command=on_rf, width=100).grid(row=8, column=1, sticky="w", padx=8)
+        self._switch_row(tab, 9, "Automatyczny rozmiar timera (do panelu)",
+                         "timer", "autosize")
 
         self._section(tab, 10, "── Cel czasu / Sub-X ─────────────────")
         tgt_var = ctk.BooleanVar(value=self.cfg.g("target","enabled"))
@@ -451,7 +563,7 @@ class SettingsWindow(ctk.CTkToplevel):
     # ── Statystyki ────────────────────────────────────────────────
 
     def _tab_stats(self, tab):
-        tab.grid_columnconfigure(0, weight=1)
+        tab = self._scroll(tab)
         self._section(tab, 0, "── Które statystyki pokazywać ────────")
         items = [
             ("Najlepszy czas",   "stats","show_best"),
@@ -462,6 +574,19 @@ class SettingsWindow(ctk.CTkToplevel):
         ]
         for i, (lbl, *p) in enumerate(items):
             self._switch_row(tab, i+1, lbl, *p)
+
+        self._section(tab, 20, "── Liczenie średnich ────────────────")
+        ctk.CTkLabel(tab, text="Odrzucane czasy", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=21, column=0, sticky="w", padx=14, pady=6)
+        trim_map = {"WCA / csTimer (5%)": "wca", "Zawsze 1 z każdej strony": "one"}
+        trim_rev = {v: k for k, v in trim_map.items()}
+        trv = ctk.StringVar(value=trim_rev.get(self.cfg.g("stats", "trim_mode"), "WCA / csTimer (5%)"))
+        def on_trim(v):
+            self.cfg.s("stats", "trim_mode", trim_map[v]); self.on_change()
+        ctk.CTkSegmentedButton(tab, values=list(trim_map), variable=trv,
+                               command=on_trim).grid(row=21, column=1, columnspan=2, sticky="w", padx=8)
+        self._switch_row(tab, 22, "Pokazuj najlepszą średnią (PB) pod aktualną",
+                         "stats", "show_best_avg")
 
         self._section(tab, len(items)+2, "── Własne średnie ───────────────────")
 

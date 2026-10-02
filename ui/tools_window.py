@@ -41,6 +41,7 @@ class ToolsWindow(ctk.CTkToplevel):
         self._viz_resize_id  = None
         self._chart_resize_id = None
         self._hist_resize_id  = None
+        self._refresh_id      = None
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._build()
@@ -50,8 +51,9 @@ class ToolsWindow(ctk.CTkToplevel):
     # ── build ─────────────────────────────────────────────────────
 
     def _build(self):
-        tabs = ctk.CTkTabview(self)
+        tabs = ctk.CTkTabview(self, command=self._refresh_current)
         tabs.pack(fill="both", expand=True, padx=8, pady=8)
+        self._tabs = tabs
         for t in ["📈  Wykres", "📊  Histogram", "🔢  Statystyki",
                   "🎲  Wizualizacja", "🎵  Metronom"]:
             tabs.add(t)
@@ -66,28 +68,20 @@ class ToolsWindow(ctk.CTkToplevel):
     def _times(self):
         return self._app.sm.get(self._app.cur)["times"]
 
-    def _valid(self):
-        return [effective(e) for e in self._times() if effective(e) != float("inf")]
+    def _stats(self):
+        st = self._app.stats
+        if st.count != len(self._times()):
+            st.load(self._times())
+        return st
 
-    def _ao_n(self, n, times=None):
-        t = times if times is not None else self._times()
-        if len(t) < n: return None
-        sub = sorted(effective(e) for e in t[-n:])
-        trimmed = sub[1:-1]
-        if any(v == float("inf") for v in trimmed): return float("inf")
-        return sum(trimmed) / len(trimmed)
+    def _valid(self):
+        return [v for v in self._stats().effs if v != float("inf")]
+
+    def _ao_n(self, n):
+        return self._stats().current(n)
 
     def _best_ao_n(self, n):
-        times = self._times()
-        if len(times) < n: return None
-        best = float("inf")
-        for i in range(n - 1, len(times)):
-            sub = sorted(effective(e) for e in times[i-n+1:i+1])
-            trimmed = sub[1:-1]
-            if any(v == float("inf") for v in trimmed): continue
-            val = sum(trimmed) / len(trimmed)
-            if val < best: best = val
-        return best if best < float("inf") else None
+        return self._stats().best_average(n)[0]
 
     def _fmts(self, v):
         dec = self._app.cfg.g("timer", "decimals")
@@ -169,34 +163,27 @@ class ToolsWindow(ctk.CTkToplevel):
                 xs.append(i + 1); ys.append(eff)
 
         if ys:
-            ax.plot(xs, ys, color="#3dbb77", lw=1.2, alpha=0.75, zorder=2)
-            ax.scatter(xs, ys, color="#3dbb77", s=12, zorder=3)
+            many = len(ys) > 400       # big sessions: thin line, tiny dots
+            ax.plot(xs, ys, color="#3dbb77", lw=0.6 if many else 1.2,
+                    alpha=0.5 if many else 0.75, zorder=2)
+            ax.scatter(xs, ys, color="#3dbb77", s=2 if many else 12, zorder=3)
 
         top_y = max(ys) * 1.08 if ys else 60
         if xs_bad:
             ax.scatter(xs_bad, [top_y] * len(xs_bad),
                        color="#ff5555", s=22, marker="x", zorder=4, label="DNF/DNS")
 
-        # rolling ao5
-        # _ao_n only ever looks at the last n elements of what it's given
-        # (t[-n:]), so passing the whole times[:i+1] growing prefix on every
-        # iteration was an O(n^2) chain of prefix copies for no reason - a
-        # fixed n-sized slice gives the exact same result.
-        ao5_pts = []
-        for i in range(4, len(times)):
-            v = self._ao_n(5, times[i-4:i+1])
-            if v and v != float("inf"):
-                ao5_pts.append((i + 1, v))
+        # rolling averages straight from the stats engine (cached, O(1) per
+        # point after the first draw) instead of re-sorting every window
+        st = self._stats()
+        ao5_pts, ao12_pts = [], []
+        for n, pts in ((5, ao5_pts), (12, ao12_pts)):
+            for i, v in enumerate(st.rolling(n)):
+                if v is not None and v != float("inf"):
+                    pts.append((i + 1, v))
         if ao5_pts:
             ax.plot([p[0] for p in ao5_pts], [p[1] for p in ao5_pts],
                     color="#ffaa33", lw=1.6, label="Ao5", zorder=5)
-
-        # rolling ao12
-        ao12_pts = []
-        for i in range(11, len(times)):
-            v = self._ao_n(12, times[i-11:i+1])
-            if v and v != float("inf"):
-                ao12_pts.append((i + 1, v))
         if ao12_pts:
             ax.plot([p[0] for p in ao12_pts], [p[1] for p in ao12_pts],
                     color="#5588ff", lw=1.6, label="Ao12", zorder=5)
@@ -288,29 +275,19 @@ class ToolsWindow(ctk.CTkToplevel):
         valid = self._valid()
         dec   = self._app.cfg.g("timer", "decimals")
 
-        dnf_n = sum(1 for e in times if e.get("penalty") in ("DNF","DNS") or
-                    (e.get("penalty") == "DNF"))
-        dns_n = sum(1 for e in times if e.get("penalty") == "DNS")
-        dnf_n = sum(1 for e in times if effective(e) == float("inf"))
-
-        median_v = std_v = None
-        if valid:
-            srt = sorted(valid)
-            n   = len(srt)
-            median_v = srt[n//2] if n % 2 else (srt[n//2-1] + srt[n//2]) / 2
-            if n >= 2:
-                mean = sum(valid) / n
-                std_v = math.sqrt(sum((x - mean)**2 for x in valid) / n)
-
+        st    = self._stats()
+        dnf_n = st.dnf_count
+        median_v = st.median()
+        std_v    = st.std
         rows = [
             ("── Ogólne ──────────────────────────────",  None),
             ("Wszystkich solvów",   str(len(times))),
             ("Valid (bez DNF/DNS)", str(len(valid))),
             ("DNF / DNS",           str(dnf_n)),
             ("── Czasy ───────────────────────────────",  None),
-            ("Najlepszy",           self._fmts(min(valid) if valid else None)),
-            ("Najgorszy",           self._fmts(max(valid) if valid else None)),
-            ("Średnia sesji",       self._fmts(sum(valid)/len(valid) if valid else None)),
+            ("Najlepszy",           self._fmts(st.best)),
+            ("Najgorszy",           self._fmts(st.worst)),
+            ("Średnia sesji",       self._fmts(st.mean)),
             ("Mediana",             self._fmts(median_v)),
             ("Odch. std.",          self._fmts(std_v)),
             ("── Averages (ostatnie) ─────────────────", None),
@@ -318,11 +295,13 @@ class ToolsWindow(ctk.CTkToplevel):
             ("Ao12",                self._fmts(self._ao_n(12))),
             ("Ao50",                self._fmts(self._ao_n(50))),
             ("Ao100",               self._fmts(self._ao_n(100))),
+            ("Ao1000",              self._fmts(self._ao_n(1000))),
             ("── Najlepsze averages ───────────────────", None),
             ("Najlepsze Ao5",       self._fmts(self._best_ao_n(5))),
             ("Najlepsze Ao12",      self._fmts(self._best_ao_n(12))),
             ("Najlepsze Ao50",      self._fmts(self._best_ao_n(50))),
             ("Najlepsze Ao100",     self._fmts(self._best_ao_n(100))),
+            ("Najlepsze Ao1000",    self._fmts(self._best_ao_n(1000))),
         ]
         self._stats_data = rows
 
@@ -513,9 +492,19 @@ class ToolsWindow(ctk.CTkToplevel):
     # ── public refresh API ────────────────────────────────────────
 
     def refresh_after_solve(self):
-        self.refresh_chart()
-        self.refresh_histogram()
-        self.refresh_stats()
+        # Debounced and only for the tab you're looking at: redrawing three
+        # matplotlib figures after every solve was a visible hitch.
+        if self._refresh_id is not None:
+            self.after_cancel(self._refresh_id)
+        self._refresh_id = self.after(250, self._refresh_current)
+
+    def _refresh_current(self):
+        self._refresh_id = None
+        tab = self._tabs.get()
+        if "Wykres" in tab:       self.refresh_chart()
+        elif "Histogram" in tab:  self.refresh_histogram()
+        elif "Statystyki" in tab: self.refresh_stats()
+        elif "Wizualizacja" in tab: self.refresh_viz()
 
     # ── close ─────────────────────────────────────────────────────
 

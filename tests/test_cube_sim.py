@@ -3,7 +3,7 @@ import importlib.util
 import os
 import sys
 
-MAIN_DIR = r"C:\Users\User\rubik-timer"
+MAIN_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 spec = importlib.util.spec_from_file_location("cube_sim", os.path.join(MAIN_DIR, "cube_sim.py"))
 cube_sim = importlib.util.module_from_spec(spec)
 sys.modules["cube_sim"] = cube_sim
