@@ -213,7 +213,7 @@ class TimesList(ctk.CTkFrame):
         acc = theme.accent(self.app.cfg)
         fam = theme.ui_family()
         mono = self.app.cfg.g("times_list", "mono_digits")
-        tfam = theme.mono_family() if mono else fam
+        tfam = theme.mono_family() if mono else None
         fs = max(8, int(11 * s)) if rh < 28 * s else max(9, int(12 * s))
 
         bg = pick(C["panel"])
@@ -260,7 +260,7 @@ class TimesList(ctk.CTkFrame):
                 ttxt = display(e, dec) + ("+" if pen == "+2" else "")
                 tcol = gold if i == best_idx else txt
             c.create_text(time_x, cy, text=ttxt, anchor="w", fill=tcol,
-                          font=(tfam, fs + 1, "bold"))
+                          font=theme.tkf(fs + 1, "bold", tfam))
             if e.get("note"):
                 c.create_text(time_x - int(4 * s), cy, text="•", anchor="e",
                               fill=pick(acc), font=(fam, fs))
@@ -272,12 +272,12 @@ class TimesList(ctk.CTkFrame):
                     vt = "DNF"
                 else:
                     vt = fmt(v, min(dec, 2))
-                c.create_text(col_x[k], cy, text=vt, anchor="e", fill=muted, font=(tfam, fs))
+                c.create_text(col_x[k], cy, text=vt, anchor="e", fill=muted, font=theme.tkf(fs, family=tfam))
 
         # header drawn last so rows scroll underneath it
         c.create_rectangle(0, 0, w, hh, fill=bg, width=0)
         c.create_line(pad, hh - 1, w - pad, hh - 1, fill=pick(C["border"]))
-        hf = (fam, max(8, fs - 2), "bold")
+        hf = theme.tkf(max(8, fs - 2), "bold")
         c.create_text(num_w, hh // 2, text="#", anchor="e", fill=muted, font=hf)
         c.create_text(time_x, hh // 2, text="czas", anchor="w", fill=muted, font=hf)
         for k in cols:

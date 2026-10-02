@@ -17,6 +17,9 @@ from ui.celebrate import STYLES
 
 FONT_FAMILIES = [
     "Default",
+    # dołączone do programu (nowoczesne, działają na każdym komputerze)
+    "Poppins SemiBold", "Poppins", "Poppins Medium", "Chakra Petch",
+    "Titillium Web", "IBM Plex Mono SemiBold",
     # Sans-serif
     "Segoe UI", "Arial", "Arial Black", "Arial Narrow", "Helvetica",
     "Verdana", "Tahoma", "Calibri", "Trebuchet MS", "Century Gothic",

@@ -26,6 +26,7 @@ py -m PyInstaller ^
     --name "Rubiks Timer" ^
     --icon "icon.ico" ^
     --add-data "icon.ico;." ^
+    --add-data "fonts;fonts" ^
     --collect-all customtkinter ^
     main.py
 

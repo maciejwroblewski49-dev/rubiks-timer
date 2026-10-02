@@ -114,7 +114,7 @@ class StatDetailDialog(ctk.CTkToplevel):
         txt.pack(side="left", fill="both", expand=True, padx=(4, 0), pady=4)
 
         txt.tag_configure("num", foreground=pick(C["muted"]), font=(fam, 10))
-        txt.tag_configure("t", font=(fam, 13, "bold"))
+        txt.tag_configure("t", font=theme.tkf(13, "bold"))
         txt.tag_configure("best", foreground=pick(C["good"]))
         txt.tag_configure("worst", foreground=pick(C["bad"]))
         txt.tag_configure("scr", foreground=pick(C["muted"]), font=(mono, 9),

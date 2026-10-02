@@ -11,7 +11,7 @@ import tkinter.messagebox as mb
 
 from utils import fmt, display, effective, _bring_to_front, _HAS_WINSOUND, _winsound
 from scramble import PUZZLES
-from persistence import ICON_FILE, Config, Sessions
+from persistence import ICON_FILE, _ASSETS, Config, Sessions
 from hardware_timer import MoyuInput, _load_sounddevice, _moyu_mode
 from cube_sim import _make_viz_state, _viz_net_dims
 from stats import SessionStats
@@ -19,6 +19,7 @@ from ui import theme
 from ui.theme import C, pick
 from ui.layout import LayoutManager, PANELS, PANEL_NAMES, PRESETS, FOCUS_LAYOUT
 from ui.times_list import TimesList
+from ui.timer_display import TimerDisplay
 from ui.celebrate import Celebration, play_fanfare
 from ui.time_detail_dialog import TimeDetailDialog
 from ui.stat_detail_dialog import StatDetailDialog
@@ -47,6 +48,7 @@ class App(ctk.CTk):
 
     def __init__(self):
         cfg = Config()
+        theme.load_fonts(_ASSETS)        # bundled Poppins etc., before Tk starts
         theme.install(cfg)               # palette for every window, before any widget exists
         super().__init__()
         self.title("Wróbel Timer")
@@ -330,10 +332,10 @@ class App(ctk.CTk):
                                                  self._insp_on.get())).pack(side="right")
 
         self.timer_var = ctk.StringVar(value="0.000")
-        self._timer_font = theme.font(88, "bold")
-        self.timer_lbl = ctk.CTkLabel(f, textvariable=self.timer_var, font=self._timer_font,
-                                      text_color=C["text"])
-        self.timer_lbl.grid(row=1, column=0, sticky="nsew", padx=8)
+        self.timer_lbl = TimerDisplay(f, self.timer_var, bg=pick(C["panel"]))
+        self.timer_lbl.configure(width=1, height=1)     # takes whatever space is left
+        self.timer_lbl.grid(row=1, column=0, sticky="nsew", padx=12)
+        self.timer_lbl.bind("<Configure>", lambda e: self._schedule_fit(), add="+")
 
         self._target_lbl = ctk.CTkLabel(f, text="", font=theme.font(15, "bold"))
         self._target_lbl.grid(row=2, column=0, pady=(0, 2))
@@ -481,8 +483,10 @@ class App(ctk.CTk):
             return
 
         family = self.cfg.g("font", "timer_family")
-        self._timer_font.configure(family=family if family and family != "Default"
-                                   else theme.ui_family())
+        if not family or family == "Default":
+            family = theme.TIMER_FONTS[0] if theme.TIMER_FONTS[0] in theme._LOADED else None
+        self.timer_lbl.set_bg(C["panel"])
+        self.timer_lbl.set_font(family=family)
         self._fit_timer_font()
 
         sc_sz     = self.cfg.g("font", "scramble_size")
@@ -551,7 +555,8 @@ class App(ctk.CTk):
             col = self.cfg.g("colors","timer_idle")
             if col.upper() == "#FFFFFF":          # the default = follow the theme
                 col = C["text"]
-        self.timer_lbl.configure(text_color=col)
+        self.timer_lbl.set_color(col)
+        self.timer_lbl.set_tabular(state in (self.RUNNING, self.INSPECTION))
 
     def _schedule_fit(self):
         if self._fit_id is not None:
@@ -560,20 +565,20 @@ class App(ctk.CTk):
 
     def _fit_timer_font(self):
         self._fit_id = None
+        s = self._scale()
         if not self.cfg.g("timer", "autosize"):
-            size = int(self.cfg.g("font", "timer_size"))
+            px = int(self.cfg.g("font", "timer_size") * s)
         else:
-            f = self._panels["timer"]
-            W, H = f.winfo_width(), f.winfo_height()
-            if W < 50 or H < 50:
+            t = self.timer_lbl
+            W, H = t.winfo_width(), t.winfo_height()
+            if W < 40 or H < 30:
                 return
-            s = self._scale()
-            chars = len(fmt(59.999, self.cfg.g("timer", "decimals"))) + 0.4
-            by_w = (W - 40 * s) / (chars * 0.62)
-            by_h = (H - 120 * s) * 0.95
-            size = int(max(28, min(by_w, by_h, 340 * s)) / s)
-        if self._timer_font.cget("size") != size:
-            self._timer_font.configure(size=size)
+            sample = fmt(59.999, self.cfg.g("timer", "decimals"))
+            by_w = (W - 16 * s) * 100 / max(1, t.text_width(sample, 100))
+            by_h = H * 0.95
+            px = int(max(24 * s, min(by_w, by_h, 420 * s)))
+        if px != self.timer_lbl.px:
+            self.timer_lbl.set_font(px=px)
 
     def _on_layout_changed(self):
         self._set_active(self._viz_main_btn, self.layout.visible("viz"))
@@ -677,7 +682,7 @@ class App(ctk.CTk):
             elif rem > -2:
                 if self.timer_var.get() != "+2":
                     self.timer_var.set("+2")
-                    self.timer_lbl.configure(text_color=self.cfg.g("colors","timer_penalty"))
+                    self.timer_lbl.set_color(self.cfg.g("colors","timer_penalty"))
             else:
                 self._state = self.STOPPED
                 self._record(0.0, "DNF")
@@ -791,7 +796,7 @@ class App(ctk.CTk):
         is_pb = new_eff != INF and prev_best is not None and new_eff < prev_best
         self._set_timer_color(self.STOPPED)
         if is_pb:
-            self.timer_lbl.configure(text_color=pick(C["gold"]))
+            self.timer_lbl.set_color(C["gold"])
             self.after(2200, lambda: self._state == self.STOPPED and self._set_timer_color(self.STOPPED))
 
         # ── records: what was beaten, biggest first ──
@@ -1504,7 +1509,7 @@ class App(ctk.CTk):
         state  = _make_viz_state(puzzle, scr)
         if state is None:
             canvas.create_text(w//2, h//2, text=f"Brak podglądu\ndla {puzzle}",
-                               fill=pick(C["muted"]), font=(theme.ui_family(), 11),
+                               fill=pick(C["muted"]), font=theme.tkf(11),
                                anchor="center", justify="center")
             return
         nc, nr = _viz_net_dims(state)

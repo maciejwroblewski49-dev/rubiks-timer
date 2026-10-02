@@ -76,22 +76,13 @@ class Celebration:
     # ── surfaces ──────────────────────────────────────────────────
 
     def _make_panel_overlay(self):
-        f = self.app._panels["timer"]
-        inset = max(2, int(int(self.app.cfg.g("layout", "radius")) * 0.35) + 1)
+        # draw straight onto the timer's own canvas: the time stays visible
+        self.cv = self.app.timer_lbl
         self.bg = pick(C["panel"])
-        self.cv = tk.Canvas(f, highlightthickness=0, bd=0, bg=self.bg)
-        tk.Place.place_configure(self.cv, x=inset, y=inset, relwidth=1, relheight=1,
-                                 width=-2 * inset, height=-2 * inset)
-        self.cv.update_idletasks()
-        # the overlay hides the label, so paint the time ourselves
-        lbl = self.app.timer_lbl
-        cx = lbl.winfo_x() + lbl.winfo_width() / 2 - inset
-        cy = lbl.winfo_y() + lbl.winfo_height() / 2 - inset
-        fnt = self.app._timer_font
-        self.timer_item = self.cv.create_text(
-            cx, cy, text=self.app.timer_var.get(), fill=pick(C["gold"]),
-            font=(fnt.cget("family"), -int(fnt.cget("size") * self.scale), "bold"))
-        self.center = (cx, cy)
+        bb = self.cv.digits_bbox()
+        w, h = self.cv.winfo_width(), self.cv.winfo_height()
+        self.center = ((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2) if bb else (w / 2, h / 2)
+        self.timer_item = "timer"
 
     def _make_window(self):
         app = self.app
@@ -128,16 +119,21 @@ class Celebration:
         if self.timer_item is None:
             y = cy
         else:
-            # above the digits if there is room, otherwise over them on a pill
-            y = max(44 * s, cy - self._timer_half() - 30 * s)
-        fam = theme.ui_family()
+            # in the gap above or below the digits, whichever is bigger;
+            # if neither fits, over the top of the digits on a solid pill
+            bb = self.cv.bbox(self.timer_item) or (0, cy - 60, 0, cy + 60)
+            above, below = bb[1], self.H - bb[3]
+            if below > above and below > 90 * s:
+                y = bb[3] + (below - 52 * s) / 2
+            else:
+                y = max(34 * s, min(above - 56 * s, above / 2) if above > 90 * s else 34 * s)
         acc = pick(theme.accent(self.app.cfg))
         self.banner_y = y
         self.b_title = self.cv.create_text(cx, y, text=self.title, fill=pick(C["gold"]),
-                                           font=(fam, -int(10 * s), "bold"))
+                                           font=theme.tkf(-int(10 * s), "bold"), tags=("fx",))
         self.b_sub = self.cv.create_text(cx, y + 32 * s, text=self.subtitle,
                                          fill="#ffffff" if self.bg == _KEY else pick(C["text"]),
-                                         font=(fam, -int(15 * s), "bold"))
+                                         font=theme.tkf(-int(15 * s), "bold"), tags=("fx",))
         # a solid rounded pill keeps the text readable over digits / confetti
         sub_w = (self.cv.bbox(self.b_sub) or (0, 0, 300, 0))
         half_w = max(230 * s, (sub_w[2] - sub_w[0]) / 2 + 28 * s)
@@ -146,12 +142,9 @@ class Celebration:
         pts = [x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1,
                x1 - r, y1, x0 + r, y1, x0, y1, x0, y1 - r, x0, y0 + r, x0, y0]
         fill = "#111522" if self.bg == _KEY else pick(C["panel_alt"])
-        self.pill = self.cv.create_polygon(pts, smooth=True, fill=fill, outline=acc, width=2)
+        self.pill = self.cv.create_polygon(pts, smooth=True, fill=fill, outline=acc, width=2,
+                                           tags=("fx",))
         self.cv.tag_lower(self.pill, self.b_title)
-
-    def _timer_half(self):
-        bb = self.cv.bbox(self.timer_item)
-        return (bb[3] - bb[1]) / 2 if bb else 60
 
     # ── particles ─────────────────────────────────────────────────
 
@@ -159,9 +152,9 @@ class Celebration:
         size = random.uniform(5, 10) * self.scale * (1.4 if shape == "dot" else 1)
         col = random.choice(COLORS)
         if shape == "rect":
-            item = self.cv.create_polygon(0, 0, 0, 0, 0, 0, fill=col, outline="")
+            item = self.cv.create_polygon(0, 0, 0, 0, 0, 0, fill=col, outline="", tags=("fx",))
         else:
-            item = self.cv.create_oval(0, 0, 0, 0, fill=col, outline="")
+            item = self.cv.create_oval(0, 0, 0, 0, fill=col, outline="", tags=("fx",))
         self.parts.append({"x": x, "y": y, "vx": vx, "vy": vy, "rot": random.uniform(0, 6.28),
                            "vr": random.uniform(-9, 9), "flip": random.uniform(0, 6.28),
                            "vf": random.uniform(6, 14), "size": size, "item": item,
@@ -209,13 +202,12 @@ class Celebration:
             self._burst()
 
         # banner: pop in, then float up and shrink away at the end
-        fam = theme.ui_family()
         pop = min(1.0, t / 0.22)
         ease = 1 - (1 - pop) ** 3
         over = 1.0 + 0.12 * math.sin(min(1.0, t / 0.35) * math.pi)
         out = max(0.0, (t - (self.DURATION - 0.35)) / 0.35)
         size = max(1, int((30 if self.big else 22) * s * ease * over * (1 - out)))
-        cv.itemconfigure(self.b_title, font=(fam, -size, "bold"))
+        cv.itemconfigure(self.b_title, font=theme.tkf(-size, "bold"))
         cv.itemconfigure(self.b_sub, state="normal" if t > 0.18 and out < 0.6 else "hidden")
         cv.itemconfigure(self.pill, state="normal" if t > 0.08 and out < 0.6 else "hidden")
         if self.timer_item is not None:
@@ -266,7 +258,7 @@ class Celebration:
             if self._top is not None:
                 self._top.destroy()
             else:
-                self.cv.destroy()
+                self.cv.delete("fx")
         except tk.TclError:
             pass
         try:

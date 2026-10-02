@@ -65,24 +65,76 @@ def tint(accent_pair, base_key, t):
     return (mix(C[base_key][0], accent_pair[0], t), mix(C[base_key][1], accent_pair[1], t))
 
 
+# ── fonts ─────────────────────────────────────────────────────────
+# Modern fonts ship with the app (fonts/, SIL OFL) and are loaded privately at
+# start-up, so nothing has to be installed and it never falls back to the
+# Office-looking system font.
+BUNDLED_FONTS = {
+    # family name as Windows/fontconfig see it -> file
+    "Poppins":                "Poppins-Regular.ttf",
+    "Poppins Medium":         "Poppins-Medium.ttf",
+    "Poppins SemiBold":       "Poppins-SemiBold.ttf",
+    "Poppins Bold":           "Poppins-Bold.ttf",       # = "Poppins" + bold
+    "Chakra Petch":           "ChakraPetch-SemiBold.ttf",
+    "Titillium Web":          "TitilliumWeb-Bold.ttf",
+    "IBM Plex Mono SemiBold": "IBMPlexMono-SemiBold.ttf",
+}
+# fonts offered for the timer digits (first = default)
+TIMER_FONTS = ["Poppins SemiBold", "Poppins", "Chakra Petch", "Titillium Web",
+               "IBM Plex Mono SemiBold"]
+_LOADED = set()
+
+
+def load_fonts(assets_dir):
+    """Register the bundled fonts. Call before the Tk root is created."""
+    import os
+    folder = os.path.join(assets_dir, "fonts")
+    if not sys.platform.startswith("win"):
+        try:
+            os.makedirs(os.path.expanduser(ctk.FontManager.linux_font_path), exist_ok=True)
+        except Exception:
+            pass
+    for fam, fname in BUNDLED_FONTS.items():
+        path = os.path.join(folder, fname)
+        if not os.path.exists(path):
+            continue
+        ok = False
+        try:
+            if sys.platform.startswith("win"):
+                # private to this process, but enumerable so Tk can list it
+                ok = ctk.FontManager.windows_load_font(path, private=True, enumerable=True)
+            else:
+                ok = ctk.FontManager.load_font(path)
+        except Exception:
+            ok = False
+        if ok:
+            _LOADED.add(fam)
+    if "Poppins Bold" in _LOADED:
+        _LOADED.add("Poppins")
+
+
 _UI_FAMILY = None
+_BOLD_FAMILY = None
 _MONO_FAMILY = None
 
 
 def _families():
-    global _UI_FAMILY, _MONO_FAMILY
+    global _UI_FAMILY, _BOLD_FAMILY, _MONO_FAMILY
     if _UI_FAMILY is None:
         try:
             import tkinter.font as tkfont
-            fams = set(tkfont.families())
+            fams = set(tkfont.families()) | _LOADED
         except Exception:
-            fams = set()
-        ui = ["Segoe UI Variable Display", "Segoe UI", "SF Pro Display",
-              "Inter", "Helvetica Neue", "Cantarell", "DejaVu Sans"]
-        mono = ["Cascadia Mono", "Consolas", "SF Mono", "Menlo",
-                "JetBrains Mono", "DejaVu Sans Mono", "Courier New"]
+            fams = set(_LOADED)
+        ui = ["Poppins", "Inter", "Segoe UI Variable Display", "Segoe UI",
+              "SF Pro Display", "Helvetica Neue", "Cantarell", "DejaVu Sans"]
+        mono = ["IBM Plex Mono SemiBold", "Cascadia Mono", "Consolas", "SF Mono",
+                "Menlo", "JetBrains Mono", "DejaVu Sans Mono", "Courier New"]
         _UI_FAMILY = next((f for f in ui if f in fams),
                           "Segoe UI" if sys.platform == "win32" else "TkDefaultFont")
+        # Poppins SemiBold reads cleaner than full Bold at UI sizes
+        _BOLD_FAMILY = "Poppins SemiBold" if (_UI_FAMILY == "Poppins" and
+                                              "Poppins SemiBold" in fams) else None
         _MONO_FAMILY = next((f for f in mono if f in fams), "Courier")
     return _UI_FAMILY, _MONO_FAMILY
 
@@ -95,8 +147,26 @@ def mono_family():
     return _families()[1]
 
 
+def spec(weight="normal", family=None):
+    """(family, tk weight) for a UI weight, mapping bold to a SemiBold face."""
+    _families()
+    if family:
+        heavy = any(w in family for w in ("SemiBold", "Bold", "Medium"))
+        return family, ("normal" if heavy else weight)
+    if weight == "bold" and _BOLD_FAMILY:
+        return _BOLD_FAMILY, "normal"
+    return ui_family(), weight
+
+
+def tkf(size, weight="normal", family=None):
+    """Font tuple for raw tk widgets (Canvas, Text)."""
+    fam, w = spec(weight, family)
+    return (fam, size, w)
+
+
 def font(size=13, weight="normal", family=None):
-    return ctk.CTkFont(family=family or ui_family(), size=size, weight=weight)
+    fam, w = spec(weight, family)
+    return ctk.CTkFont(family=fam, size=size, weight=w)
 
 
 def _hover(acc):
