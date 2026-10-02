@@ -34,6 +34,7 @@ def test_trim_counts():
     assert trim_count(100) == 5
     assert trim_count(100, "one") == 1
     assert trim_count(2) == 0
+    assert trim_count(3) == 0          # mo3 = plain mean
 
 
 def test_ao5_dnf_rules():

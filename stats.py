@@ -19,7 +19,7 @@ TRIM_MODES = ("wca", "one")
 
 
 def trim_count(n, mode="wca"):
-    if n < 3:
+    if n <= 3:                # mo3 is a plain mean, nothing dropped
         return 0
     if mode == "one":
         return 1
