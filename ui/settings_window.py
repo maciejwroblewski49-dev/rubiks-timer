@@ -12,6 +12,7 @@ from persistence import Config, Sessions, DATA_FILE, CFG_FILE, DATA_DIR
 from hardware_timer import MoyuInput
 from ui.theme import ACCENTS
 from ui.layout import PANELS, PANEL_NAMES, PRESETS
+from ui.celebrate import STYLES
 
 
 FONT_FAMILIES = [
@@ -106,7 +107,7 @@ class SettingsWindow(ctk.CTkToplevel):
     def __init__(self, parent, cfg: Config, sm: Sessions, on_change, on_session_reload):
         super().__init__(parent)
         self.title("Ustawienia")
-        self.geometry("680x600")
+        self.geometry("720x600")
         self.minsize(600, 480)
         self.resizable(True, True)
         self.cfg = cfg
@@ -120,12 +121,14 @@ class SettingsWindow(ctk.CTkToplevel):
         tabs = ctk.CTkTabview(self, anchor="nw")
         tabs.pack(fill="both", expand=True, padx=10, pady=10)
         self._tabs = tabs
-        for t in ["🎨  Wygląd", "🧩  Układ", "⏱  Timer", "🔌  Timer audio", "📊  Statystyki", "💾  Dane"]:
+        for t in ["🎨  Wygląd", "🧩  Układ", "⏱  Timer", "🎉  Efekty", "🔌  Audio",
+                  "📊  Statystyki", "💾  Dane"]:
             tabs.add(t)
         self._tab_appearance(tabs.tab("🎨  Wygląd"))
         self._tab_layout(tabs.tab("🧩  Układ"))
+        self._tab_effects(tabs.tab("🎉  Efekty"))
         self._tab_timer(tabs.tab("⏱  Timer"))
-        self._tab_moyu(tabs.tab("🔌  Timer audio"))
+        self._tab_moyu(tabs.tab("🔌  Audio"))
         self._tab_stats(tabs.tab("📊  Statystyki"))
         self._tab_data(tabs.tab("💾  Dane"))
 
@@ -478,6 +481,62 @@ class SettingsWindow(ctk.CTkToplevel):
         self._switch_row(sf, 21, "Cyfry o stałej szerokości", "times_list", "mono_digits")
         self._switch_row(sf, 22, "Przy DNF pokazuj też zmierzony czas", "times_list", "show_raw_on_dnf")
 
+    # ── Efekty (rekordy) ──────────────────────────────────────────
+
+    def _tab_effects(self, tab):
+        sf = self._scroll(tab)
+        app = self.master
+
+        self._section(sf, 0, "── Efekty przy pobiciu rekordu ───────")
+        self._switch_row(sf, 1, "Włącz efekty", "celebrate", "enabled")
+
+        ctk.CTkLabel(sf, text="Styl", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=2, column=0, sticky="w", padx=14, pady=6)
+        rev = {v: k for k, v in STYLES.items()}
+        stv = ctk.StringVar(value=rev.get(self.cfg.g("celebrate", "style"), "Konfetti"))
+        ctk.CTkSegmentedButton(sf, values=list(STYLES), variable=stv,
+                               command=lambda v: self.cfg.s("celebrate", "style", STYLES[v])
+                               ).grid(row=2, column=1, columnspan=2, sticky="w", padx=8)
+
+        ctk.CTkLabel(sf, text="Ilość konfetti", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=3, column=0, sticky="w", padx=14, pady=6)
+        iv = ctk.DoubleVar(value=float(self.cfg.g("celebrate", "intensity")))
+        il = ctk.CTkLabel(sf, text=f"{iv.get():.0%}", width=44)
+        il.grid(row=3, column=2, padx=4)
+        def on_int(v):
+            val = round(float(v) * 4) / 4
+            iv.set(val); il.configure(text=f"{val:.0%}")
+            self.cfg.s("celebrate", "intensity", val)
+        ctk.CTkSlider(sf, from_=0.25, to=2.5, variable=iv, command=on_int,
+                      width=170).grid(row=3, column=1, padx=6)
+
+        self._switch_row(sf, 4, "Dźwięk fanfary (Windows)", "target", "pb_sound")
+        self._switch_row(sf, 5, "Na całym oknie (Windows, eksperymentalne)", "celebrate", "whole_window")
+
+        self._section(sf, 6, "── Kiedy świętować ──────────────────")
+        for i, (lbl, key) in enumerate([
+                ("Nowy najlepszy pojedynczy czas", "on_single"),
+                ("Rekord Ao5", "on_ao5"),
+                ("Rekord Ao12", "on_ao12"),
+                ("Rekord Ao100", "on_ao100"),
+                ("Rekord własnych średnich", "on_custom"),
+                ("Czas poniżej celu (sub-X, mały efekt)", "on_target")]):
+            self._switch_row(sf, 7 + i, lbl, "celebrate", key)
+
+        self._section(sf, 14, "── Podgląd ──────────────────────────")
+        pf = ctk.CTkFrame(sf, fg_color="transparent")
+        pf.grid(row=15, column=0, columnspan=3, sticky="w", padx=14, pady=(4, 12))
+        dec = self.cfg.g("timer", "decimals")
+        ctk.CTkButton(pf, text="🎉  Pokaż rekord", width=150,
+                      command=lambda: app._celebrate("🏆  NOWY REKORD!",
+                                                     f"{fmt(9.876, dec)}   (było {fmt(10.234, dec)},  −{fmt(0.358, dec)})",
+                                                     "single", True)
+                      ).pack(side="left", padx=(0, 8))
+        ctk.CTkButton(pf, text="✓  Pokaż sub-X", width=130,
+                      command=lambda: app._celebrate("✓  SUB-10!", f"{fmt(9.512, dec)}   ·   seria 3",
+                                                     "target", False)
+                      ).pack(side="left")
+
     # ── Timer ─────────────────────────────────────────────────────
 
     def _tab_timer(self, tab):
@@ -556,7 +615,7 @@ class SettingsWindow(ctk.CTkToplevel):
         pb_var = ctk.BooleanVar(value=self.cfg.g("target","pb_sound"))
         def on_pb_snd():
             self.cfg.s("target","pb_sound", pb_var.get()); self.on_change()
-        ctk.CTkSwitch(tab, text="Dźwięk przy PB", variable=pb_var,
+        ctk.CTkSwitch(tab, text="Dźwięk przy rekordach", variable=pb_var,
                       command=on_pb_snd).grid(row=13, column=0, columnspan=2,
                       sticky="w", padx=14, pady=6)
 

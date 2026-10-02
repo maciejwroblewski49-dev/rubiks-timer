@@ -108,6 +108,11 @@ class SessionStats:
         self._invalidate_from(i)
         self._recount()
 
+    def insert(self, i, entry):
+        self.effs.insert(i, effective(entry))
+        self._invalidate_from(i)
+        self._recount()
+
     def delete(self, i):
         self.effs.pop(i)
         self._invalidate_from(i)

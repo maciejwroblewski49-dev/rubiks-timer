@@ -19,6 +19,7 @@ from ui import theme
 from ui.theme import C, pick
 from ui.layout import LayoutManager, PANELS, PANEL_NAMES, PRESETS, FOCUS_LAYOUT
 from ui.times_list import TimesList
+from ui.celebrate import Celebration, play_fanfare
 from ui.time_detail_dialog import TimeDetailDialog
 from ui.stat_detail_dialog import StatDetailDialog
 from ui.settings_window import SettingsWindow
@@ -49,8 +50,9 @@ class App(ctk.CTk):
         theme.install(cfg)               # palette for every window, before any widget exists
         super().__init__()
         self.title("Wróbel Timer")
-        self.geometry("1180x760")
         self.minsize(900, 600)
+        self._restore_window(cfg)
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
         if os.path.exists(ICON_FILE):
             try:
                 self.iconbitmap(ICON_FILE)
@@ -81,6 +83,8 @@ class App(ctk.CTk):
         self._focus_mode: bool    = False
         self._solving_view: bool  = False
         self._edit_bar            = None
+        self._celebration         = None
+        self._undo: list          = []      # deleted solves: (session, index, entry)
         self._fit_id              = None
         self._look_key            = None
 
@@ -142,6 +146,13 @@ class App(ctk.CTk):
         self.bind("<KP_Enter>",  self._manual_confirm)
         self.bind("<Escape>", self._on_escape)
         self.bind("<F11>",    lambda _: self._toggle_fullscreen())
+        self.bind("<F1>",     lambda _: self._show_shortcuts())
+        self.bind("<Control-Key-1>", lambda _: self._key_pen(None))
+        self.bind("<Control-Key-2>", lambda _: self._key_pen("+2"))
+        self.bind("<Control-Key-3>", lambda _: self._key_pen("DNF"))
+        self.bind("<Control-z>", lambda _: self._undo_delete())
+        self.bind("<Control-Z>", lambda _: self._undo_delete())
+        self.bind("<Control-Delete>", lambda _: self._delete_last())
         self.bind("<f>",      lambda _: self._toggle_focus())
         self.bind("<F>",      lambda _: self._toggle_focus())
         self.focus_set()
@@ -256,6 +267,7 @@ class App(ctk.CTk):
         self._btn(right, "📈  Narzędzia", self._open_tools, width=118).pack(side="left", padx=3)
         self._layout_btn = self._btn(right, "✥  Układ", self._toggle_layout_edit, width=92)
         self._layout_btn.pack(side="left", padx=3)
+        self._btn(right, "?", self._show_shortcuts, size=15).pack(side="left", padx=3)
         self._btn(right, "⚙", self._open_settings, size=15).pack(side="left", padx=3)
         self._focus_btn = self._btn(right, "◉", self._toggle_focus, size=15)
         self._focus_btn.pack(side="left", padx=3)
@@ -692,6 +704,7 @@ class App(ctk.CTk):
         if self.space_down: return
         self.space_down = True
         if self.layout.editing: return
+        self._stop_celebration()
 
         if self._state == self.MANUAL_INPUT:
             self._manual_cancel()
@@ -752,11 +765,19 @@ class App(ctk.CTk):
 
     # ── recording ─────────────────────────────────────────────────
 
+    def _avg_watch(self):
+        """Averages whose new PB is celebrated / announced."""
+        c = self.cfg.g("celebrate")
+        ns = [n for n in (5, 12, 100) if c.get(f"on_ao{n}")]
+        if c.get("on_custom"):
+            ns += [n for n in self.cfg.g("stats", "custom_averages") if n not in ns]
+        return ns
+
     def _record(self, t, penalty):
         dec   = self.cfg.g("timer","decimals")
         st    = self.stats
-        prev_best = st.best if st.best is not None else INF
-        watch = [n for n in (5, 12, 100) if self.cfg.g("stats", f"show_ao{n}")]
+        prev_best = st.best
+        watch = self._avg_watch()
         prev_avg = {n: st.best_average(n)[0] for n in watch}
 
         entry = {"time":t, "penalty":penalty, "scramble":self.scramble,
@@ -767,23 +788,28 @@ class App(ctk.CTk):
         self._set_solving_view(False)
         self.timer_var.set(display(entry, dec))
         new_eff = effective(entry)
-        is_pb = new_eff != INF and new_eff < prev_best and st.count > 1
-
+        is_pb = new_eff != INF and prev_best is not None and new_eff < prev_best
+        self._set_timer_color(self.STOPPED)
         if is_pb:
             self.timer_lbl.configure(text_color=pick(C["gold"]))
-            self.after(1800, lambda: self._set_timer_color(self.STOPPED))
-            if self.cfg.g("target","pb_sound") and _HAS_WINSOUND:
-                threading.Thread(target=self._play_pb_sound, daemon=True).start()
-        else:
-            self._set_timer_color(self.STOPPED)
+            self.after(2200, lambda: self._state == self.STOPPED and self._set_timer_color(self.STOPPED))
 
+        # ── records: what was beaten, biggest first ──
+        events = []        # (title, subtitle, fanfare kind, big)
         msgs = []
         if is_pb:
             msgs.append(("🏆 Nowy PB!", C["gold"]))
+            if self.cfg.g("celebrate", "on_single"):
+                events.append(("🏆  NOWY REKORD!",
+                               f"{self._fs(new_eff)}   (było {self._fs(prev_best)},  −{self._fs(prev_best - new_eff)})",
+                               "single", True))
         for n in watch:
             v, idx = st.best_average(n)
             if idx == st.count - 1 and prev_avg[n] is not None and v < prev_avg[n]:
                 msgs.append((f"🏆 PB ao{n}", C["gold"]))
+                events.append((f"🏆  REKORD AO{n}!",
+                               f"{self._fs(v)}   (było {self._fs(prev_avg[n])},  −{self._fs(prev_avg[n] - v)})",
+                               "average", True))
 
         # ── target / streak ──
         tgt_en  = self.cfg.g("target","enabled")
@@ -792,6 +818,9 @@ class App(ctk.CTk):
             if new_eff <= tgt_val:
                 self._streak += 1
                 msgs.insert(0, (f"✓ -{tgt_val - new_eff:.2f}s  streak {self._streak}", C["good"]))
+                if self.cfg.g("celebrate", "on_target"):
+                    events.append((f"✓  SUB-{tgt_val:g}!",
+                                   f"{self._fs(new_eff)}   ·   seria {self._streak}", "target", False))
             else:
                 self._streak = 0
                 msgs.insert(0, (f"✗ +{new_eff - tgt_val:.2f}s  sub-{tgt_val:.1f}", C["bad"]))
@@ -809,11 +838,34 @@ class App(ctk.CTk):
         self._new_scramble()
         if self._tools_win and self._tools_win.winfo_exists():
             self._tools_win.refresh_after_solve()
+        if events:
+            title, sub, kind, big = events[0]
+            if len(events) > 1 and big:
+                sub += "   ·   " + "  ".join(e[0].replace("🏆  ", "").replace("!", "")
+                                              for e in events[1:] if e[3])
+            self.after(30, lambda: self._celebrate(title, sub, kind, big))
 
-    @staticmethod
-    def _play_pb_sound():
-        for freq, dur in [(880,80),(1100,80),(1320,120)]:
-            _winsound.Beep(freq, dur)
+    def _celebrate(self, title, subtitle, kind="single", big=True):
+        """Confetti / fireworks / glow + fanfare for a beaten record."""
+        if not self.cfg.g("celebrate", "enabled"):
+            return
+        self._stop_celebration()
+        if self.cfg.g("target", "pb_sound"):
+            play_fanfare(kind)
+        try:
+            self._celebration = Celebration(
+                self, title, subtitle,
+                style=self.cfg.g("celebrate", "style"),
+                intensity=self.cfg.g("celebrate", "intensity"),
+                big=big, whole_window=self.cfg.g("celebrate", "whole_window"))
+        except Exception:
+            self._celebration = None      # an effect must never break timing
+
+    def _stop_celebration(self):
+        c = getattr(self, "_celebration", None)
+        if c is not None:
+            c.stop()
+            self._celebration = None
 
     # ── penalties ─────────────────────────────────────────────────
 
@@ -826,11 +878,14 @@ class App(ctk.CTk):
         if not times: return
         self._set_pen(len(times) - 1, pen, show=True)
 
-    def _set_pen(self, idx, pen, show=False):
+    def _set_pen(self, idx, pen, show=False, toggle=True):
         times = self.sm.get(self.cur)["times"]
         if not (0 <= idx < len(times)): return
         entry = dict(times[idx])
-        entry["penalty"] = None if entry.get("penalty")==pen else pen
+        if toggle:
+            entry["penalty"] = None if entry.get("penalty")==pen else pen
+        else:
+            entry["penalty"] = pen
         self.sm.update(self.cur, idx, entry)
         self.stats.update(idx, entry)
         dec = self.cfg.g("timer","decimals")
@@ -880,12 +935,116 @@ class App(ctk.CTk):
         if self._stat_win and self._stat_win.winfo_exists():
             self._stat_win.destroy()
         self._stat_win = None
+        times = self.sm.get(self.cur)["times"]
+        if not (0 <= idx < len(times)): return
+        self._undo.append((self.cur, idx, times[idx]))
+        del self._undo[:-20]
         self.sm.delete(self.cur, idx)
         self.stats.delete(idx)
         self.times_list.redraw()
         self._update_stats()
         if self._tools_win and self._tools_win.winfo_exists():
             self._tools_win.refresh_after_solve()
+        self._flash_hint(f"Usunięto solv #{idx + 1}   ·   Ctrl+Z przywraca", 4000)
+
+    # ── keyboard shortcuts ────────────────────────────────────────
+
+    def _key_pen(self, pen):
+        """Ctrl+1 / Ctrl+2 / Ctrl+3 = OK / +2 / DNF on the last solve."""
+        if self._state not in (self.IDLE, self.STOPPED): return
+        times = self.sm.get(self.cur)["times"]
+        if times:
+            self._set_pen(len(times) - 1, pen, show=True, toggle=False)
+
+    def _delete_last(self):
+        if self._state not in (self.IDLE, self.STOPPED): return
+        times = self.sm.get(self.cur)["times"]
+        if times:
+            self._del_time(len(times) - 1)
+
+    def _undo_delete(self):
+        if self._state not in (self.IDLE, self.STOPPED) or not self._undo: return
+        sess, idx, entry = self._undo.pop()
+        if sess not in self.sm.names:
+            return
+        if sess != self.cur:
+            self.sm.switch(sess); self._load_session(sess)
+        idx = min(idx, len(self.sm.get(sess)["times"]))
+        self.sm.insert(sess, idx, entry)
+        self.stats.insert(idx, entry)
+        self.times_list.redraw()
+        self._update_stats()
+        if self._tools_win and self._tools_win.winfo_exists():
+            self._tools_win.refresh_after_solve()
+        self._flash_hint(f"Przywrócono solv #{idx + 1}  ({display(entry, self.cfg.g('timer', 'decimals'))})")
+
+    def _show_shortcuts(self):
+        win = ctk.CTkToplevel(self)
+        win.title("Skróty klawiszowe")
+        win.geometry("430x520")
+        win.resizable(False, True)
+        rows = [
+            ("Spacja", "przytrzymaj = gotowość, puść = start, naciśnij = stop"),
+            ("Esc", "przerwij inspekcję / wyjdź z edycji / pełnego ekranu"),
+            ("Ctrl+1 / 2 / 3", "ostatni solve: OK / +2 / DNF"),
+            ("Ctrl+Del", "usuń ostatni solve"),
+            ("Ctrl+Z", "przywróć usunięty solve"),
+            ("M", "wpisz czas ręcznie"),
+            ("V", "podgląd kostki"),
+            ("L", "edytuj układ (przesuwanie paneli)"),
+            ("F", "tryb skupienia"),
+            ("F11", "pełny ekran"),
+            ("F1", "ta ściągawka"),
+        ]
+        ctk.CTkLabel(win, text="Skróty klawiszowe", font=theme.font(18, "bold")).pack(pady=(16, 8))
+        box = ctk.CTkFrame(win, corner_radius=12)
+        box.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+        box.grid_columnconfigure(1, weight=1)
+        for i, (k, d) in enumerate(rows):
+            ctk.CTkLabel(box, text=k, font=theme.font(13, "bold"), text_color=self._acc(),
+                         anchor="w").grid(row=i, column=0, sticky="w", padx=(14, 10), pady=5)
+            ctk.CTkLabel(box, text=d, font=theme.font(12), anchor="w", justify="left",
+                         wraplength=260).grid(row=i, column=1, sticky="w", padx=(0, 12), pady=5)
+        win.bind("<Escape>", lambda e: win.destroy())
+        _bring_to_front(win)
+
+    # ── window size / position ────────────────────────────────────
+
+    def _restore_window(self, cfg):
+        geo = cfg.g("window", "geometry")
+        try:
+            size, _, pos = geo.partition("+")
+            w, h = (int(v) for v in size.split("x"))
+            x, y = (int(v) for v in pos.replace("+-", "+").split("+")[:2]) if pos else (None, None)
+            sw, sh = self.winfo_screenwidth(), self.winfo_screenheight()
+            w, h = min(w, sw), min(h, sh)
+            if x is None or not (-w // 2 < x < sw - 80 and 0 <= y < sh - 80):
+                self.geometry(f"{w}x{h}")          # off-screen (monitor unplugged?)
+            else:
+                self.geometry(f"{w}x{h}+{x}+{y}")
+        except (ValueError, AttributeError):
+            self.geometry("1180x760")
+        if cfg.g("window", "zoomed"):
+            def _zoom():
+                try: self.state("zoomed")
+                except tk.TclError:
+                    try: self.attributes("-zoomed", True)
+                    except tk.TclError: pass
+            self.after(50, _zoom)
+
+    def _on_close(self):
+        try:
+            zoomed = self.state() == "zoomed"
+            if not zoomed:
+                try: zoomed = bool(self.attributes("-zoomed"))
+                except tk.TclError: pass
+            self.cfg.s("window", "zoomed", zoomed)
+            if not zoomed and not self.attributes("-fullscreen"):
+                self.cfg.s("window", "geometry", self.geometry())
+        except Exception:
+            pass
+        self._stop_celebration()
+        self.destroy()
 
     # ── stats ─────────────────────────────────────────────────────
 

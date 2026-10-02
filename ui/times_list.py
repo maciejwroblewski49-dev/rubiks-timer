@@ -18,6 +18,35 @@ COLUMN_TITLES = {"ao5": "ao5", "ao12": "ao12", "ao50": "ao50", "ao100": "ao100"}
 ROW_HEIGHTS = {"compact": 24, "normal": 30, "comfy": 38}
 
 
+# On Windows a <MouseWheel> event goes to the widget with keyboard focus (the
+# main window, since the timer listens for SPACE), not the one under the
+# pointer.  So one "all" binding routes wheel events to whichever list the
+# pointer is over.
+_LISTS = []
+_WHEEL_ROOTS = set()
+
+
+def _install_wheel(root):
+    if str(root) in _WHEEL_ROOTS:
+        return
+    _WHEEL_ROOTS.add(str(root))
+
+    def _route(e, delta=None):
+        try:
+            under = root.winfo_containing(e.x_root, e.y_root)
+        except (KeyError, tk.TclError):
+            return
+        _LISTS[:] = [l for l in _LISTS if l.winfo_exists()]     # drop destroyed lists
+        for lst in _LISTS:
+            if under is not None and str(under) == str(lst.canvas):
+                lst._on_wheel(e, delta)
+                return
+
+    root.bind_all("<MouseWheel>", _route, add="+")
+    root.bind_all("<Button-4>", lambda e: _route(e, 120), add="+")
+    root.bind_all("<Button-5>", lambda e: _route(e, -120), add="+")
+
+
 class TimesList(ctk.CTkFrame):
 
     def __init__(self, master, app, on_click, on_context, **kw):
@@ -43,9 +72,8 @@ class TimesList(ctk.CTkFrame):
         c.bind("<Button-1>", self._on_b1)
         c.bind("<Button-3>", self._on_b3)
         c.bind("<Button-2>", self._on_b3)          # macOS right click
-        c.bind("<MouseWheel>", self._on_wheel)
-        c.bind("<Button-4>", lambda e: self._scroll_px(-3 * self._row_h()))
-        c.bind("<Button-5>", lambda e: self._scroll_px(3 * self._row_h()))
+        _install_wheel(self.winfo_toplevel())
+        _LISTS.append(self)
 
     # ── data ──────────────────────────────────────────────────────
 
@@ -108,11 +136,12 @@ class TimesList(ctk.CTkFrame):
     def _scroll_px(self, dy):
         self._set_offset(self._target + dy, animate=True)
 
-    def _on_wheel(self, e):
-        if abs(e.delta) >= 120:
-            steps = -e.delta / 120.0               # Windows: notches of 120
+    def _on_wheel(self, e, delta=None):
+        delta = e.delta if delta is None else delta
+        if abs(delta) >= 120:
+            steps = -delta / 120.0                 # Windows: notches of 120
         else:
-            steps = -e.delta                         # macOS: small deltas
+            steps = -delta                           # macOS: small deltas
         self._scroll_px(steps * 3 * self._row_h())
 
     def _sb_cmd(self, *args):

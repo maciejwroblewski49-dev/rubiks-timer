@@ -93,6 +93,22 @@ DEFAULTS = {
         "snap":    True,
         "panels":  {},          # filled from ui.layout.PRESETS on first run
     },
+    "celebrate": {
+        "enabled":      True,
+        "style":        "confetti",   # confetti / fireworks / glow
+        "intensity":    1.0,
+        "whole_window": False,        # Windows: effect over the whole window
+        "on_single":    True,
+        "on_ao5":       True,
+        "on_ao12":      True,
+        "on_ao100":     True,
+        "on_custom":    True,
+        "on_target":    True,
+    },
+    "window": {
+        "geometry": "",
+        "zoomed":   False,
+    },
     "times_list": {
         "columns":         ["ao5", "ao12"],
         "density":         "normal",     # compact / normal / comfy
@@ -253,3 +269,4 @@ class Sessions:
     def add(self, n, e):          self._d["sessions"][n]["times"].append(e); self._save()
     def update(self, n, i, e):    self._d["sessions"][n]["times"][i] = e; self._save()
     def delete(self, n, i):       self._d["sessions"][n]["times"].pop(i); self._save()
+    def insert(self, n, i, e):    self._d["sessions"][n]["times"].insert(i, e); self._save()

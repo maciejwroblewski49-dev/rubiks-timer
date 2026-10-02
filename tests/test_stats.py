@@ -61,8 +61,11 @@ def test_engine_incremental_ops_match_reload():
 
     for step in range(200):
         op = rng.random()
-        if op < 0.6 or not times:
+        if op < 0.55 or not times:
             e = _rand_entry(rng); times.append(e); eng.append(e)
+        elif op < 0.65:
+            i = rng.randrange(len(times) + 1)
+            e = _rand_entry(rng); times.insert(i, e); eng.insert(i, e)
         elif op < 0.8:
             i = rng.randrange(len(times))
             e = _rand_entry(rng); times[i] = e; eng.update(i, e)
