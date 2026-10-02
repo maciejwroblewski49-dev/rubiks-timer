@@ -49,6 +49,7 @@ DEFAULTS = {
     "colors": {
         "timer_idle":       "#FFFFFF",
         "timer_ready":      "#FF4444",
+        "timer_armed":      "#44DD77",
         "timer_running":    "#44DD77",
         "timer_inspection": "#FFAA00",
         "timer_penalty":    "#FF4444",
@@ -61,8 +62,11 @@ DEFAULTS = {
         "inspection_duration": 15,
         "hide_during_solve":   False,
         "start_delay_ms":      0,
+        "hold_ms":             300,      # like csTimer: hold SPACE 0.3 s before it starts
         "decimals":            3,
-        "refresh_ms":          50,
+        "refresh_ms":          30,
+        "autosize":            True,
+        "hide_ui_while_solving": False,
     },
     "stats": {
         "show_best":       True,
@@ -71,6 +75,11 @@ DEFAULTS = {
         "show_ao100":      False,
         "show_mean":       True,
         "custom_averages": [],
+        "style":           "table",   # "table" (jak csTimer) / "tiles"
+        "show_mo3":        True,
+        "show_ao50":       False,
+        "trim_mode":       "wca",     # "wca" = ceil(5%) z każdej strony, "one" = zawsze 1
+        "show_best_avg":   True,
     },
     "font": {
         "timer_size":      88,
@@ -80,6 +89,44 @@ DEFAULTS = {
     },
     "show_main_viz": False,
     "ui_zoom":       1.0,
+    "accent":        "Niebieski",
+    "layout": {
+        "preset":  "csTimer",
+        "gap":     8,
+        "radius":  14,
+        "borders": True,
+        "snap":    True,
+        "panels":  {},          # filled from ui.layout.PRESETS on first run
+    },
+    "celebrate": {
+        "enabled":      True,
+        "style":        "confetti",   # confetti / fireworks / glow
+        "intensity":    1.0,
+        "whole_window": False,        # Windows: effect over the whole window
+        "on_single":    True,
+        "on_ao5":       True,
+        "on_ao12":      True,
+        "on_ao100":     True,
+        "on_custom":    True,
+        "on_target":    True,
+    },
+    "backup": {
+        "auto":      True,      # daily + on close
+        "keep":      14,
+        "cloud_dir": "",        # e.g. Google Drive / OneDrive folder
+    },
+    "window": {
+        "geometry": "",
+        "zoomed":   False,
+    },
+    "times_list": {
+        "columns":         ["ao5", "ao12"],
+        "density":         "normal",     # compact / normal / comfy
+        "smooth_scroll":   True,
+        "highlight_pb":    True,
+        "mono_digits":     False,
+        "show_raw_on_dnf": False,
+    },
     "scramble_align": "center",
     "target": {
         "enabled": False,
@@ -92,6 +139,15 @@ DEFAULTS = {
         "type":    "m",          # 'm' = MoYu, 's' = StackMat Gen3/4/5 (jack)
     },
 }
+
+
+def _atomic_write(path, text):
+    """Write via a temp file + rename, so a crash mid-write never leaves a
+    half-written (unreadable) sessions.json behind."""
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, path)
 
 
 def _merge(base, over):
@@ -120,9 +176,7 @@ class Config:
         return copy.deepcopy(DEFAULTS)
 
     def _write_now(self):
-        data = json.dumps(self._d, ensure_ascii=False, indent=2)
-        with open(CFG_FILE,"w",encoding="utf-8") as f:
-            f.write(data)
+        _atomic_write(CFG_FILE, json.dumps(self._d, ensure_ascii=False, indent=2))
 
     def save(self, delay=0.4):
         # Debounced: collapses rapid-fire saves (e.g. dragging a settings
@@ -175,9 +229,11 @@ class Sessions:
         return {"last": name, "sessions": {name: {"puzzle":"3x3","times":[]}}}
 
     def _write_now(self):
-        data = json.dumps(self._d, ensure_ascii=False, indent=2)
-        with open(DATA_FILE,"w",encoding="utf-8") as f:
-            f.write(data)
+        # No indent: with indent= json falls back to its pure-Python encoder,
+        # which on a big sessions.json held the GIL long enough to stutter the
+        # UI right after a solve.  The C encoder is ~10x faster.
+        _atomic_write(DATA_FILE, json.dumps(self._d, ensure_ascii=False,
+                                            separators=(",", ":")))
 
     def _save(self, delay=0.4):
         # Debounced + off the UI thread: sessions.json is 190KB+ and growing;
@@ -223,3 +279,4 @@ class Sessions:
     def add(self, n, e):          self._d["sessions"][n]["times"].append(e); self._save()
     def update(self, n, i, e):    self._d["sessions"][n]["times"][i] = e; self._save()
     def delete(self, n, i):       self._d["sessions"][n]["times"].pop(i); self._save()
+    def insert(self, n, i, e):    self._d["sessions"][n]["times"].insert(i, e); self._save()

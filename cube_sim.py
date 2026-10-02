@@ -786,7 +786,7 @@ def _is_333_scramble(scramble):
 def _make_viz_state(puzzle, scramble):
     """Return a solved cube state with scramble applied, or None if no viz."""
     try:
-        if puzzle in ("3x3", "3x3 OH", "3x3 BLD"):
+        if puzzle in ("3x3", "3x3 OH", "3x3 BLD", "3x3 FMC"):
             if not _is_333_scramble(scramble): return None
             cs = CubeState(); cs.apply(scramble); return cs
         if puzzle == "2x2":
@@ -801,7 +801,7 @@ def _make_viz_state(puzzle, scramble):
                 base = tok[:-1] if tok.endswith("'") or tok.endswith("2") else tok
                 if base not in valid: return None
             cs = SkewbState(); cs.apply(scramble); return cs
-        if puzzle == "4x4":
+        if puzzle in ("4x4", "4x4 BLD"):
             valid = {'U','D','R','L','F','B'}
             for tok in (scramble or "").split():
                 base = tok[:-1] if tok.endswith("'") or tok.endswith("2") else tok

@@ -10,10 +10,17 @@ import tkinter.messagebox as mb
 from utils import _bring_to_front, fmt, effective
 from persistence import Config, Sessions, DATA_FILE, CFG_FILE, DATA_DIR
 from hardware_timer import MoyuInput
+from ui.theme import ACCENTS
+from ui.layout import PANELS, PANEL_NAMES, PRESETS
+from ui.celebrate import STYLES
+import backup
 
 
 FONT_FAMILIES = [
     "Default",
+    # dołączone do programu (nowoczesne, działają na każdym komputerze)
+    "Poppins SemiBold", "Poppins", "Poppins Medium", "Chakra Petch",
+    "Titillium Web", "IBM Plex Mono SemiBold",
     # Sans-serif
     "Segoe UI", "Arial", "Arial Black", "Arial Narrow", "Helvetica",
     "Verdana", "Tahoma", "Calibri", "Trebuchet MS", "Century Gothic",
@@ -104,8 +111,9 @@ class SettingsWindow(ctk.CTkToplevel):
     def __init__(self, parent, cfg: Config, sm: Sessions, on_change, on_session_reload):
         super().__init__(parent)
         self.title("Ustawienia")
-        self.geometry("620x560")
-        self.resizable(False, False)
+        self.geometry("720x600")
+        self.minsize(600, 480)
+        self.resizable(True, True)
         self.cfg = cfg
         self.sm  = sm
         self.on_change        = on_change
@@ -116,11 +124,15 @@ class SettingsWindow(ctk.CTkToplevel):
     def _build(self):
         tabs = ctk.CTkTabview(self, anchor="nw")
         tabs.pack(fill="both", expand=True, padx=10, pady=10)
-        for t in ["🎨  Wygląd", "⏱  Timer", "🔌  Timer audio", "📊  Statystyki", "💾  Dane"]:
+        self._tabs = tabs
+        for t in ["🎨  Wygląd", "🧩  Układ", "⏱  Timer", "🎉  Efekty", "🔌  Audio",
+                  "📊  Statystyki", "💾  Dane"]:
             tabs.add(t)
         self._tab_appearance(tabs.tab("🎨  Wygląd"))
+        self._tab_layout(tabs.tab("🧩  Układ"))
+        self._tab_effects(tabs.tab("🎉  Efekty"))
         self._tab_timer(tabs.tab("⏱  Timer"))
-        self._tab_moyu(tabs.tab("🔌  Timer audio"))
+        self._tab_moyu(tabs.tab("🔌  Audio"))
         self._tab_stats(tabs.tab("📊  Statystyki"))
         self._tab_data(tabs.tab("💾  Dane"))
 
@@ -291,7 +303,8 @@ class SettingsWindow(ctk.CTkToplevel):
         self._section(sf, 8, "── Kolory timera (pojedynczo) ────────")
         color_keys = [
             ("Oczekiwanie",    "colors", "timer_idle"),
-            ("Gotowość",       "colors", "timer_ready"),
+            ("Trzymasz spację", "colors", "timer_ready"),
+            ("Gotowy do startu", "colors", "timer_armed"),
             ("Biegnie",        "colors", "timer_running"),
             ("Inspekcja",      "colors", "timer_inspection"),
             ("DNF / kara",     "colors", "timer_penalty"),
@@ -301,7 +314,7 @@ class SettingsWindow(ctk.CTkToplevel):
             sw = self._color_row(sf, 9+i, lbl, *p)
             self._color_swatches[p[-1]] = sw
 
-        self._section(sf, 15, "── Tło aplikacji ─────────────────────")
+        self._section(sf, 16, "── Tło aplikacji ─────────────────────")
 
         def _bg_color_row(parent, row, label, *path):
             ctk.CTkLabel(parent, text=label, font=ctk.CTkFont(size=13),
@@ -328,53 +341,226 @@ class SettingsWindow(ctk.CTkToplevel):
                           fg_color="gray25", hover_color="gray35",
                           command=clear).pack(side="left")
 
-        _bg_color_row(sf, 16, "Tło okna",   "colors", "bg_window")
-        _bg_color_row(sf, 17, "Pasek górny","colors", "bg_header")
+        _bg_color_row(sf, 17, "Tło okna",   "colors", "bg_window")
+        _bg_color_row(sf, 18, "Pasek górny","colors", "bg_header")
 
-        self._section(sf, 18, "── Czcionki ──────────────────────────")
+        self._section(sf, 19, "── Czcionki ──────────────────────────")
 
         ctk.CTkLabel(sf, text="Czcionka timera", font=ctk.CTkFont(size=13),
-                     anchor="w").grid(row=19, column=0, sticky="w", padx=14, pady=6)
+                     anchor="w").grid(row=20, column=0, sticky="w", padx=14, pady=6)
         tfv = ctk.StringVar(value=self.cfg.g("font", "timer_family"))
         def on_tf(v): self.cfg.s("font", "timer_family", v); self.on_change()
         ctk.CTkOptionMenu(sf, variable=tfv, values=FONT_FAMILIES,
                           command=on_tf, width=190).grid(
-            row=19, column=1, columnspan=2, sticky="w", padx=8, pady=6)
+            row=20, column=1, columnspan=2, sticky="w", padx=8, pady=6)
 
         ctk.CTkLabel(sf, text="Rozmiar timera", font=ctk.CTkFont(size=13),
-                     anchor="w").grid(row=20, column=0, sticky="w", padx=14, pady=6)
+                     anchor="w").grid(row=21, column=0, sticky="w", padx=14, pady=6)
         tsv = ctk.IntVar(value=self.cfg.g("font", "timer_size"))
         tvlb = ctk.CTkLabel(sf, text=str(tsv.get()), width=32)
-        tvlb.grid(row=20, column=2, padx=4)
+        tvlb.grid(row=21, column=2, padx=4)
         def on_tsize(v):
             val = int(float(v)); tsv.set(val); tvlb.configure(text=str(val))
             self.cfg.s("font", "timer_size", val); self.on_change()
         ctk.CTkSlider(sf, from_=48, to=120, variable=tsv,
-                      command=on_tsize, width=170).grid(row=20, column=1, padx=6)
+                      command=on_tsize, width=170).grid(row=21, column=1, padx=6)
 
         ctk.CTkLabel(sf, text="Czcionka scrambla", font=ctk.CTkFont(size=13),
-                     anchor="w").grid(row=21, column=0, sticky="w", padx=14, pady=6)
+                     anchor="w").grid(row=22, column=0, sticky="w", padx=14, pady=6)
         sfv = ctk.StringVar(value=self.cfg.g("font", "scramble_family"))
         def on_sf(v): self.cfg.s("font", "scramble_family", v); self.on_change()
         ctk.CTkOptionMenu(sf, variable=sfv, values=FONT_FAMILIES,
                           command=on_sf, width=190).grid(
-            row=21, column=1, columnspan=2, sticky="w", padx=8, pady=6)
+            row=22, column=1, columnspan=2, sticky="w", padx=8, pady=6)
 
         ctk.CTkLabel(sf, text="Rozmiar scrambla", font=ctk.CTkFont(size=13),
-                     anchor="w").grid(row=22, column=0, sticky="w", padx=14, pady=6)
+                     anchor="w").grid(row=23, column=0, sticky="w", padx=14, pady=6)
         ssv = ctk.IntVar(value=self.cfg.g("font", "scramble_size"))
         svlb = ctk.CTkLabel(sf, text=str(ssv.get()), width=32)
-        svlb.grid(row=22, column=2, padx=4)
+        svlb.grid(row=23, column=2, padx=4)
         def on_ssize(v):
             val = int(float(v)); ssv.set(val); svlb.configure(text=str(val))
             self.cfg.s("font", "scramble_size", val); self.on_change()
         ctk.CTkSlider(sf, from_=10, to=28, variable=ssv,
-                      command=on_ssize, width=170).grid(row=22, column=1, padx=6)
+                      command=on_ssize, width=170).grid(row=23, column=1, padx=6)
+
+        self._section(sf, 24, "── Kolor akcentu (przyciski, wyróżnienia) ──")
+        ctk.CTkLabel(sf, text="Akcent", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=25, column=0, sticky="w", padx=14, pady=6)
+        acc_row = ctk.CTkFrame(sf, fg_color="transparent")
+        acc_row.grid(row=25, column=1, columnspan=3, sticky="w", padx=8, pady=6)
+        def _set_acc(name):
+            self.cfg.s("accent", name); self.on_change()
+        for name, (light, dark) in ACCENTS.items():
+            ctk.CTkButton(acc_row, text="", width=26, height=26, corner_radius=13,
+                          fg_color=dark, hover_color=light,
+                          command=lambda n=name: _set_acc(n)).pack(side="left", padx=2)
+
+    # ── Układ ─────────────────────────────────────────────────────
+
+    def _scroll(self, tab):
+        sf = ctk.CTkScrollableFrame(tab, fg_color="transparent")
+        sf.pack(fill="both", expand=True)
+        sf.grid_columnconfigure(0, weight=1)
+        return sf
+
+    def _tab_layout(self, tab):
+        sf = self._scroll(tab)
+        app = self.master
+
+        self._section(sf, 0, "── Układ okna ───────────────────────")
+        ctk.CTkLabel(sf, text="Gotowy układ", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=1, column=0, sticky="w", padx=14, pady=6)
+        cur = self.cfg.g("layout", "preset")
+        pv = ctk.StringVar(value=cur if cur in PRESETS else list(PRESETS)[0])
+        def on_preset(v):
+            app.layout.load_preset(v)
+            _sync_vis()
+        ctk.CTkOptionMenu(sf, variable=pv, values=list(PRESETS), width=190,
+                          command=on_preset).grid(row=1, column=1, columnspan=2, sticky="w", padx=8)
+        def cstimer_style():
+            self.cfg.s("layout", "radius", 6)
+            self.cfg.s("layout", "gap", 4)
+            self.cfg.s("layout", "borders", True)
+            self.cfg.s("stats", "style", "table")
+            self.cfg.s("timer", "hold_ms", 300)
+            cols = self.cfg.g("times_list", "columns")
+            if "ao5" not in cols or "ao12" not in cols:
+                self.cfg.s("times_list", "columns", ["ao5", "ao12"])
+            app.layout.load_preset("csTimer")
+            pv.set("csTimer")
+            _sync_vis()
+            self.on_change()
+        ctk.CTkButton(sf, text="⚡  Styl csTimer jednym kliknięciem", width=260,
+                      command=cstimer_style).grid(row=2, column=1, columnspan=2, sticky="w", padx=8, pady=(4, 6))
+        def edit_now():
+            self.destroy()
+            if not app.layout.editing:
+                app._toggle_layout_edit()
+        ctk.CTkButton(sf, text="✥  Przesuń panele myszką…", width=220,
+                      command=edit_now).grid(row=2, column=0, sticky="w", padx=14, pady=(4, 6))
+        ctk.CTkLabel(sf, text="Skrót: L  ·  w trybie edycji przeciągasz panel za belkę, a róg ◢ zmienia jego rozmiar",
+                     font=ctk.CTkFont(size=11), text_color="gray55", anchor="w"
+                     ).grid(row=3, column=0, columnspan=3, sticky="w", padx=14)
+
+        self._section(sf, 4, "── Widoczne panele ──────────────────")
+        vis_vars = {}
+        for i, pid in enumerate(PANELS):
+            ctk.CTkLabel(sf, text=PANEL_NAMES[pid], font=ctk.CTkFont(size=13),
+                         anchor="w").grid(row=5 + i, column=0, sticky="w", padx=14, pady=4)
+            v = ctk.BooleanVar(value=app.layout.visible(pid))
+            vis_vars[pid] = v
+            ctk.CTkSwitch(sf, variable=v, text="",
+                          command=lambda p=pid, var=v: (app.layout.set_visible(p, var.get()), _sync_vis())
+                          ).grid(row=5 + i, column=1, sticky="w", padx=8)
+        def _sync_vis():
+            for p, var in vis_vars.items():
+                var.set(app.layout.visible(p))
+
+        self._section(sf, 11, "── Wygląd paneli ────────────────────")
+        def _slider(row, label, key, lo, hi):
+            ctk.CTkLabel(sf, text=label, font=ctk.CTkFont(size=13),
+                         anchor="w").grid(row=row, column=0, sticky="w", padx=14, pady=6)
+            var = ctk.IntVar(value=int(self.cfg.g("layout", key)))
+            lb = ctk.CTkLabel(sf, text=f"{var.get()} px", width=44)
+            lb.grid(row=row, column=2, padx=4)
+            def on(v):
+                val = int(float(v)); var.set(val); lb.configure(text=f"{val} px")
+                self.cfg.s("layout", key, val); self.on_change()
+            ctk.CTkSlider(sf, from_=lo, to=hi, number_of_steps=hi - lo, variable=var,
+                          command=on, width=170).grid(row=row, column=1, padx=6)
+        _slider(12, "Odstęp między panelami", "gap", 0, 24)
+        _slider(13, "Zaokrąglenie rogów", "radius", 0, 24)
+        self._switch_row(sf, 14, "Ramki paneli", "layout", "borders")
+        self._switch_row(sf, 15, "Przyciąganie do krawędzi przy przesuwaniu", "layout", "snap")
+
+        self._section(sf, 16, "── Lista czasów ─────────────────────")
+        ctk.CTkLabel(sf, text="Kolumny", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=17, column=0, sticky="w", padx=14, pady=6)
+        cf = ctk.CTkFrame(sf, fg_color="transparent")
+        cf.grid(row=17, column=1, columnspan=3, sticky="w", padx=8)
+        def on_col(key, var):
+            cols = [c for c in ("ao5", "ao12", "ao50", "ao100")
+                    if (var.get() if c == key else c in self.cfg.g("times_list", "columns"))]
+            self.cfg.s("times_list", "columns", cols); self.on_change()
+        for key in ("ao5", "ao12", "ao50", "ao100"):
+            v = ctk.BooleanVar(value=key in self.cfg.g("times_list", "columns"))
+            ctk.CTkCheckBox(cf, text=key, variable=v, width=70,
+                            command=lambda k=key, var=v: on_col(k, var)).pack(side="left", padx=(0, 6))
+
+        ctk.CTkLabel(sf, text="Wysokość wierszy", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=18, column=0, sticky="w", padx=14, pady=6)
+        dens = {"Kompaktowe": "compact", "Normalne": "normal", "Duże": "comfy"}
+        drev = {v: k for k, v in dens.items()}
+        dv = ctk.StringVar(value=drev.get(self.cfg.g("times_list", "density"), "Normalne"))
+        ctk.CTkSegmentedButton(sf, values=list(dens), variable=dv,
+                               command=lambda v: (self.cfg.s("times_list", "density", dens[v]), self.on_change())
+                               ).grid(row=18, column=1, columnspan=2, sticky="w", padx=8)
+        self._switch_row(sf, 19, "Płynne przewijanie", "times_list", "smooth_scroll")
+        self._switch_row(sf, 20, "Wyróżnij najlepszy czas (PB)", "times_list", "highlight_pb")
+        self._switch_row(sf, 21, "Cyfry o stałej szerokości", "times_list", "mono_digits")
+        self._switch_row(sf, 22, "Przy DNF pokazuj też zmierzony czas", "times_list", "show_raw_on_dnf")
+
+    # ── Efekty (rekordy) ──────────────────────────────────────────
+
+    def _tab_effects(self, tab):
+        sf = self._scroll(tab)
+        app = self.master
+
+        self._section(sf, 0, "── Efekty przy pobiciu rekordu ───────")
+        self._switch_row(sf, 1, "Włącz efekty", "celebrate", "enabled")
+
+        ctk.CTkLabel(sf, text="Styl", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=2, column=0, sticky="w", padx=14, pady=6)
+        rev = {v: k for k, v in STYLES.items()}
+        stv = ctk.StringVar(value=rev.get(self.cfg.g("celebrate", "style"), "Konfetti"))
+        ctk.CTkSegmentedButton(sf, values=list(STYLES), variable=stv,
+                               command=lambda v: self.cfg.s("celebrate", "style", STYLES[v])
+                               ).grid(row=2, column=1, columnspan=2, sticky="w", padx=8)
+
+        ctk.CTkLabel(sf, text="Ilość konfetti", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=3, column=0, sticky="w", padx=14, pady=6)
+        iv = ctk.DoubleVar(value=float(self.cfg.g("celebrate", "intensity")))
+        il = ctk.CTkLabel(sf, text=f"{iv.get():.0%}", width=44)
+        il.grid(row=3, column=2, padx=4)
+        def on_int(v):
+            val = round(float(v) * 4) / 4
+            iv.set(val); il.configure(text=f"{val:.0%}")
+            self.cfg.s("celebrate", "intensity", val)
+        ctk.CTkSlider(sf, from_=0.25, to=2.5, variable=iv, command=on_int,
+                      width=170).grid(row=3, column=1, padx=6)
+
+        self._switch_row(sf, 4, "Dźwięk fanfary (Windows)", "target", "pb_sound")
+        self._switch_row(sf, 5, "Na całym oknie (Windows, eksperymentalne)", "celebrate", "whole_window")
+
+        self._section(sf, 6, "── Kiedy świętować ──────────────────")
+        for i, (lbl, key) in enumerate([
+                ("Nowy najlepszy pojedynczy czas", "on_single"),
+                ("Rekord Ao5", "on_ao5"),
+                ("Rekord Ao12", "on_ao12"),
+                ("Rekord Ao100", "on_ao100"),
+                ("Rekord własnych średnich", "on_custom"),
+                ("Czas poniżej celu (sub-X, mały efekt)", "on_target")]):
+            self._switch_row(sf, 7 + i, lbl, "celebrate", key)
+
+        self._section(sf, 14, "── Podgląd ──────────────────────────")
+        pf = ctk.CTkFrame(sf, fg_color="transparent")
+        pf.grid(row=15, column=0, columnspan=3, sticky="w", padx=14, pady=(4, 12))
+        dec = self.cfg.g("timer", "decimals")
+        ctk.CTkButton(pf, text="🎉  Pokaż rekord", width=150,
+                      command=lambda: app._celebrate("🏆  NOWY REKORD!",
+                                                     f"{fmt(9.876, dec)}   (było {fmt(10.234, dec)},  −{fmt(0.358, dec)})",
+                                                     "single", True)
+                      ).pack(side="left", padx=(0, 8))
+        ctk.CTkButton(pf, text="✓  Pokaż sub-X", width=130,
+                      command=lambda: app._celebrate("✓  SUB-10!", f"{fmt(9.512, dec)}   ·   seria 3",
+                                                     "target", False)
+                      ).pack(side="left")
 
     # ── Timer ─────────────────────────────────────────────────────
 
     def _tab_timer(self, tab):
-        tab.grid_columnconfigure(0, weight=1)
+        tab = self._scroll(tab)
 
         self._section(tab, 0, "── Inspekcja ─────────────────────────")
         self._switch_row(tab, 1, "Włącz inspekcję przed startem",
@@ -392,6 +578,18 @@ class SettingsWindow(ctk.CTkToplevel):
         self._section(tab, 3, "── Sterowanie ────────────────────────")
         self._switch_row(tab, 4, "Ukryj czas podczas solva (blind mode)",
                          "timer","hide_during_solve")
+        ctk.CTkLabel(tab, text="Przytrzymaj spację przed startem", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=17, column=0, sticky="w", padx=14, pady=6)
+        hold_map = {"0 s (od razu)": 0, "0.3 s (csTimer)": 300, "0.55 s (StackMat)": 550, "1 s": 1000}
+        hold_rev = {v: k for k, v in hold_map.items()}
+        hv = ctk.StringVar(value=hold_rev.get(self.cfg.g("timer", "hold_ms"),
+                                              f"{self.cfg.g('timer', 'hold_ms')} ms"))
+        ctk.CTkOptionMenu(tab, variable=hv, values=list(hold_map), width=170,
+                          command=lambda v: self.cfg.s("timer", "hold_ms", hold_map[v])
+                          ).grid(row=17, column=1, columnspan=2, sticky="w", padx=8)
+        self._section(tab, 15, "── Start i ekran podczas solva ───────")
+        self._switch_row(tab, 16, "Pokazuj tylko timer (chowaj resztę paneli)",
+                         "timer", "hide_ui_while_solving")
 
         ctk.CTkLabel(tab, text="Opóźnienie startu", font=ctk.CTkFont(size=13),
                      anchor="w").grid(row=5, column=0, sticky="w", padx=14, pady=6)
@@ -418,6 +616,8 @@ class SettingsWindow(ctk.CTkToplevel):
         ctk.CTkOptionMenu(tab, variable=rfv,
                           values=["16 ms","30 ms","50 ms","100 ms","200 ms"],
                           command=on_rf, width=100).grid(row=8, column=1, sticky="w", padx=8)
+        self._switch_row(tab, 9, "Automatyczny rozmiar timera (do panelu)",
+                         "timer", "autosize")
 
         self._section(tab, 10, "── Cel czasu / Sub-X ─────────────────")
         tgt_var = ctk.BooleanVar(value=self.cfg.g("target","enabled"))
@@ -444,24 +644,48 @@ class SettingsWindow(ctk.CTkToplevel):
         pb_var = ctk.BooleanVar(value=self.cfg.g("target","pb_sound"))
         def on_pb_snd():
             self.cfg.s("target","pb_sound", pb_var.get()); self.on_change()
-        ctk.CTkSwitch(tab, text="Dźwięk przy PB", variable=pb_var,
+        ctk.CTkSwitch(tab, text="Dźwięk przy rekordach", variable=pb_var,
                       command=on_pb_snd).grid(row=13, column=0, columnspan=2,
                       sticky="w", padx=14, pady=6)
 
     # ── Statystyki ────────────────────────────────────────────────
 
     def _tab_stats(self, tab):
-        tab.grid_columnconfigure(0, weight=1)
+        tab = self._scroll(tab)
         self._section(tab, 0, "── Które statystyki pokazywać ────────")
         items = [
             ("Najlepszy czas",   "stats","show_best"),
+            ("Mo3",              "stats","show_mo3"),
             ("Ao5",              "stats","show_ao5"),
             ("Ao12",             "stats","show_ao12"),
+            ("Ao50",             "stats","show_ao50"),
             ("Ao100",            "stats","show_ao100"),
             ("Średnia sesji",    "stats","show_mean"),
         ]
         for i, (lbl, *p) in enumerate(items):
             self._switch_row(tab, i+1, lbl, *p)
+
+        self._section(tab, 17, "── Wygląd statystyk ─────────────────")
+        ctk.CTkLabel(tab, text="Styl", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=18, column=0, sticky="w", padx=14, pady=6)
+        style_map = {"Tabela (jak csTimer)": "table", "Kafelki": "tiles"}
+        style_rev = {v: k for k, v in style_map.items()}
+        stv = ctk.StringVar(value=style_rev.get(self.cfg.g("stats", "style"), "Tabela (jak csTimer)"))
+        ctk.CTkSegmentedButton(tab, values=list(style_map), variable=stv,
+                               command=lambda v: (self.cfg.s("stats", "style", style_map[v]), self.on_change())
+                               ).grid(row=18, column=1, columnspan=2, sticky="w", padx=8)
+        self._section(tab, 20, "── Liczenie średnich ────────────────")
+        ctk.CTkLabel(tab, text="Odrzucane czasy", font=ctk.CTkFont(size=13),
+                     anchor="w").grid(row=21, column=0, sticky="w", padx=14, pady=6)
+        trim_map = {"WCA / csTimer (5%)": "wca", "Zawsze 1 z każdej strony": "one"}
+        trim_rev = {v: k for k, v in trim_map.items()}
+        trv = ctk.StringVar(value=trim_rev.get(self.cfg.g("stats", "trim_mode"), "WCA / csTimer (5%)"))
+        def on_trim(v):
+            self.cfg.s("stats", "trim_mode", trim_map[v]); self.on_change()
+        ctk.CTkSegmentedButton(tab, values=list(trim_map), variable=trv,
+                               command=on_trim).grid(row=21, column=1, columnspan=2, sticky="w", padx=8)
+        self._switch_row(tab, 22, "Pokazuj najlepszą średnią (PB) pod aktualną",
+                         "stats", "show_best_avg")
 
         self._section(tab, len(items)+2, "── Własne średnie ───────────────────")
 
@@ -513,7 +737,58 @@ class SettingsWindow(ctk.CTkToplevel):
     # ── Dane ──────────────────────────────────────────────────────
 
     def _tab_data(self, tab):
-        tab.grid_columnconfigure(0, weight=1)
+        tab = self._scroll(tab)
+
+        # ── automatic backups ──
+        self._section_lbl(tab, "Automatyczna kopia zapasowa")
+        ctk.CTkLabel(tab, text="Kopia wszystkich sesji i ustawień robi się sama raz dziennie i przy\n"
+                               "zamykaniu programu. Wybierz folder Google Drive / OneDrive / Dropbox,\n"
+                               "a kopie same trafią do chmury.",
+                     font=ctk.CTkFont(size=11), text_color="gray55", justify="left"
+                     ).pack(anchor="w", padx=14, pady=(0, 6))
+        av = ctk.BooleanVar(value=self.cfg.g("backup", "auto"))
+        ctk.CTkSwitch(tab, text="Rób kopie automatycznie", variable=av,
+                      command=lambda: self.cfg.s("backup", "auto", av.get())
+                      ).pack(anchor="w", padx=14, pady=4)
+
+        keep_row = ctk.CTkFrame(tab, fg_color="transparent")
+        keep_row.pack(anchor="w", padx=14, pady=4)
+        ctk.CTkLabel(keep_row, text="Trzymaj ostatnie").pack(side="left")
+        kv = ctk.StringVar(value=str(self.cfg.g("backup", "keep")))
+        ctk.CTkOptionMenu(keep_row, variable=kv, values=["5", "14", "30", "60", "120"], width=80,
+                          command=lambda v: self.cfg.s("backup", "keep", int(v))
+                          ).pack(side="left", padx=8)
+        ctk.CTkLabel(keep_row, text="kopii").pack(side="left")
+
+        cloud_box = ctk.CTkFrame(tab, corner_radius=10)
+        cloud_box.pack(fill="x", padx=14, pady=(8, 4))
+        self._cloud_lbl = ctk.CTkLabel(cloud_box, text="", justify="left", anchor="w",
+                                       font=ctk.CTkFont(size=12), wraplength=580)
+        self._cloud_lbl.pack(anchor="w", padx=12, pady=(10, 4))
+        cb = ctk.CTkFrame(cloud_box, fg_color="transparent")
+        cb.pack(anchor="w", padx=10, pady=(0, 10))
+        for label, folder in backup.cloud_candidates():
+            ctk.CTkButton(cb, text=f"☁  {label}", width=120,
+                          command=lambda f=folder: self._set_cloud(f)).pack(side="left", padx=2)
+        ctk.CTkButton(cb, text="📁  Wybierz folder…", width=140,
+                      command=self._pick_cloud).pack(side="left", padx=2)
+        ctk.CTkButton(cb, text="Wyłącz", width=70, fg_color="gray30", hover_color="gray40",
+                      command=lambda: self._set_cloud("")).pack(side="left", padx=2)
+
+        self._backup_status = ctk.CTkLabel(tab, text="", font=ctk.CTkFont(size=11),
+                                           text_color="gray55", justify="left", anchor="w",
+                                           wraplength=600)
+        self._backup_status.pack(anchor="w", padx=14, pady=(4, 4))
+        br = ctk.CTkFrame(tab, fg_color="transparent")
+        br.pack(anchor="w", padx=14, pady=(0, 6))
+        ctk.CTkButton(br, text="💾  Zrób kopię teraz", width=150,
+                      command=self._backup_now).pack(side="left", padx=(0, 6))
+        ctk.CTkButton(br, text="↩  Przywróć z kopii…", width=160,
+                      command=lambda: self._import_backup(initialdir=backup.LOCAL_DIR)
+                      ).pack(side="left", padx=(0, 6))
+        ctk.CTkButton(br, text="📂  Otwórz folder", width=130, fg_color="gray30", hover_color="gray40",
+                      command=self._open_backup_dir).pack(side="left")
+        self._refresh_backup_info()
 
         self._section_lbl(tab, "Bieżąca sesja")
         for text, cmd in [
@@ -534,7 +809,7 @@ class SettingsWindow(ctk.CTkToplevel):
                       anchor="w", width=300,
                       command=self._import_twisty).pack(anchor="w", padx=14, pady=3)
 
-        self._section_lbl(tab, "Backup / Przenoszenie na inne urządzenie")
+        self._section_lbl(tab, "Przenoszenie na inne urządzenie")
         ctk.CTkButton(tab, text="📦  Eksportuj wszystko  (.rktimer)",
                       anchor="w", width=300,
                       command=self._export_backup).pack(anchor="w", padx=14, pady=3)
@@ -546,7 +821,58 @@ class SettingsWindow(ctk.CTkToplevel):
         ctk.CTkButton(tab, text="🗑  Usuń wszystkie czasy ze wszystkich sesji",
                       fg_color="#4a0808", hover_color="#380606",
                       anchor="w", width=300,
-                      command=self._delete_all).pack(anchor="w", padx=14, pady=3)
+                      command=self._delete_all).pack(anchor="w", padx=14, pady=(3, 14))
+
+    # ── automatic backup helpers ──────────────────────────────────
+
+    def _refresh_backup_info(self):
+        cloud = self.cfg.g("backup", "cloud_dir")
+        self._cloud_lbl.configure(
+            text=f"☁  Kopia w chmurze:  {cloud}" if cloud else
+                 "☁  Kopia w chmurze:  wyłączona (tylko na tym komputerze)")
+        local = backup.list_backups(backup.LOCAL_DIR)
+        if local:
+            last = local[0][1].strftime("%d.%m.%Y %H:%M")
+            txt = f"Ostatnia kopia: {last}   ·   kopii na dysku: {len(local)}\n{backup.LOCAL_DIR}"
+        else:
+            txt = f"Jeszcze nie ma kopii\n{backup.LOCAL_DIR}"
+        self._backup_status.configure(text=txt)
+
+    def _set_cloud(self, folder):
+        if folder:
+            try:
+                os.makedirs(folder, exist_ok=True)
+            except OSError as e:
+                mb.showerror("Kopia w chmurze", f"Nie mogę utworzyć folderu:\n{e}", parent=self); return
+        self.cfg.s("backup", "cloud_dir", folder)
+        self._refresh_backup_info()
+        if folder:
+            self._backup_now(quiet=True)
+
+    def _pick_cloud(self):
+        folder = fd.askdirectory(parent=self, title="Folder na kopie (np. Google Drive)")
+        if folder:
+            self._set_cloud(os.path.join(folder, backup.CLOUD_SUBDIR)
+                            if os.path.basename(folder) != backup.CLOUD_SUBDIR else folder)
+
+    def _backup_now(self, quiet=False):
+        try:
+            self.sm.flush(); self.cfg.flush()
+            written = backup.write_all(self.cfg.g("backup", "keep"), self.cfg.g("backup", "cloud_dir"))
+        except OSError as e:
+            mb.showerror("Kopia zapasowa", f"Nie udało się zrobić kopii:\n{e}", parent=self); return
+        self._refresh_backup_info()
+        if not quiet:
+            mb.showinfo("Kopia zapasowa", "Zapisano:\n" + "\n".join(written), parent=self)
+            self.lift()
+
+    def _open_backup_dir(self):
+        os.makedirs(backup.LOCAL_DIR, exist_ok=True)
+        try:
+            os.startfile(backup.LOCAL_DIR)          # Windows
+        except AttributeError:
+            import subprocess
+            subprocess.Popen(["xdg-open", backup.LOCAL_DIR])
 
     def _section_lbl(self, parent, text):
         ctk.CTkLabel(parent, text=text, font=ctk.CTkFont(size=13, weight="bold"),
@@ -570,10 +896,10 @@ class SettingsWindow(ctk.CTkToplevel):
         mb.showinfo("Gotowe", f"Backup zapisany:\n{path}", parent=self)
         self.lift()
 
-    def _import_backup(self):
+    def _import_backup(self, initialdir=None):
         path = fd.askopenfilename(
             filetypes=[("Rubik Timer Backup","*.rktimer"), ("ZIP","*.zip")],
-            parent=self,
+            parent=self, initialdir=initialdir,
         )
         if not path: return
 
@@ -604,11 +930,16 @@ class SettingsWindow(ctk.CTkToplevel):
                                 self.sm._d["sessions"][sname] = sess
                         self.sm._save()
                 else:  # replace
+                    # safety copy of the current data first - replacing is one-way
+                    self.sm.flush(); self.cfg.flush()
+                    backup.make_backup(backup.LOCAL_DIR, max(30, int(self.cfg.g("backup", "keep"))))
                     if has_sessions:
                         zf.extract("sessions.json", DATA_DIR)
                         self.sm._d = self.sm._load()
                     if has_settings:
                         zf.extract("settings.json", DATA_DIR)
+                        self.cfg._d = self.cfg._load()
+                        self.on_change()
 
         except Exception as e:
             mb.showerror("Błąd importu", str(e), parent=self)

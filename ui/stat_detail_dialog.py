@@ -1,7 +1,17 @@
-"""Dialog shown when you click a stat (Ao5/Ao12/Ao100/mean/best): the list of solves that make up that statistic."""
+"""Dialog shown when you click a stat (Ao5/Ao12/Ao100/mean/best, or the "PB" under an average): the solves that make up that statistic.
+
+The rows live in one tk.Text widget instead of a frame per solve, so even
+"mean of 20 000 solves" opens instantly.
+"""
+import tkinter as tk
 import customtkinter as ctk
 
 from utils import _bring_to_front, fmt, display, effective
+from stats import trim_count
+from ui import theme
+from ui.theme import C, pick
+
+INF = float("inf")
 
 
 class StatDetailDialog(ctk.CTkToplevel):
@@ -17,121 +27,134 @@ class StatDetailDialog(ctk.CTkToplevel):
             self.destroy(); return
 
         self.title(f"{title} — {val_str}")
-        h = max(240, min(640, 140 + len(rows) * 64))
-        self.geometry(f"530x{h}")
-        self.minsize(400, 200)
+        h = max(260, min(640, 170 + len(rows) * 46))
+        self.geometry(f"560x{h}")
+        self.minsize(420, 220)
         self.resizable(True, True)
+        self.configure(fg_color=C["bg"])
         self._build(title, val_str, rows, dec)
         _bring_to_front(self)
 
     # ── data builders ─────────────────────────────────────────────
 
     def _compute(self, key, times, dec):
-        if key == "ao5":   return self._ao_data(5,   times, dec, "Ao5")
-        if key == "ao12":  return self._ao_data(12,  times, dec, "Ao12")
-        if key == "ao100": return self._ao_data(100, times, dec, "Ao100")
+        st = self._app.stats
         if key == "mean":  return self._mean_data(times, dec)
         if key == "best":  return self._best_data(times, dec)
+        if key.startswith("_best_"):
+            n = int(key[6:])
+            v, end = st.best_average(n)
+            if end is None:
+                return None, "Najlepsze", "—"
+            return self._ao_data(n, times, dec, "Najlepsze " + ("Mo3" if n == 3 else f"Ao{n}"), end=end)
         if key.startswith("_cao_"):
             n = int(key[5:])
-            return self._ao_data(n, times, dec, f"Ao{n}")
-        return None, key, "—"
+        elif key.startswith("ao"):
+            n = int(key[2:])
+        else:
+            return None, key, "—"
+        return self._ao_data(n, times, dec, "Mo3" if n == 3 else f"Ao{n}")
 
-    def _ao_data(self, n, times, dec, label):
+    def _ao_data(self, n, times, dec, label, end=None):
         if len(times) < n: return None, label, "—"
-        sub    = times[-n:]
-        offset = len(times) - n
+        end = len(times) - 1 if end is None else end
+        offset = end - n + 1
+        sub    = times[offset:end + 1]
         effs   = [effective(e) for e in sub]
         order  = sorted(range(n), key=lambda i: effs[i])
-        best_i, worst_i = order[0], order[-1]
-        mid_vals = [effs[i] for i in order[1:-1]]
-        if any(v == float("inf") for v in mid_vals):
+        t      = trim_count(n, self._app.cfg.g("stats", "trim_mode"))
+        low, high = set(order[:t]), set(order[n - t:]) if t else set()
+        kept = [effs[i] for i in order[t:n - t]] if t else effs
+        if any(v == INF for v in kept):
             val_str = "DNF"
-        elif mid_vals:
-            val_str = fmt(sum(mid_vals) / len(mid_vals), dec)
+        elif kept:
+            val_str = fmt(sum(kept) / len(kept), dec)
         else:
             val_str = "—"
         rows = []
         for i, e in enumerate(sub):
-            role = "best" if i == best_i else ("worst" if i == worst_i else "normal")
+            role = "best" if i in low else ("worst" if i in high else "normal")
             rows.append((offset + i, e, role))
         return rows, label, val_str
 
     def _mean_data(self, times, dec):
-        valid = [(i, e) for i, e in enumerate(times) if effective(e) != float("inf")]
+        valid = [(i, e) for i, e in enumerate(times) if effective(e) != INF]
         if not valid: return None, "Średnia sesji", "—"
         vals = [effective(e) for _, e in valid]
         val_str = fmt(sum(vals) / len(vals), dec)
         return [(i, e, "normal") for i, e in valid], "Średnia sesji", val_str
 
     def _best_data(self, times, dec):
-        valid = [(i, e) for i, e in enumerate(times) if effective(e) != float("inf")]
-        if not valid: return None, "Najlepszy", "—"
-        best_i, best_e = min(valid, key=lambda x: effective(x[1]))
-        return [(best_i, best_e, "best")], "Najlepszy", display(best_e, dec)
+        st = self._app.stats
+        if st.best_idx is None: return None, "Najlepszy", "—"
+        e = times[st.best_idx]
+        return [(st.best_idx, e, "best")], "Najlepszy", display(e, dec)
 
     # ── layout ────────────────────────────────────────────────────
 
     def _build(self, title, val_str, rows, dec):
-        ctk.CTkLabel(self, text=f"{title}  =  {val_str}",
-                     font=ctk.CTkFont(size=30, weight="bold")).pack(pady=(16, 2))
-        ctk.CTkLabel(self, text=f"{len(rows)} solvów  •  kliknij wiersz aby zobaczyć szczegóły",
-                     font=ctk.CTkFont(size=11), text_color="gray50").pack()
-        ctk.CTkFrame(self, height=1, fg_color="gray28").pack(fill="x", padx=16, pady=8)
+        ctk.CTkLabel(self, text=title.upper(), text_color=C["muted"],
+                     font=theme.font(12, "bold")).pack(pady=(16, 0))
+        ctk.CTkLabel(self, text=val_str, text_color=C["text"],
+                     font=theme.font(36, "bold")).pack()
+        ctk.CTkLabel(self, text=f"{len(rows)} solvów  •  kliknij wiersz, aby zobaczyć szczegóły"
+                               + ("  •  (czasy w nawiasach są odrzucone)" if any(r[2] != "normal" for r in rows) else ""),
+                     font=theme.font(11), text_color=C["muted"]).pack(pady=(0, 8))
 
-        sf = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        sf.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        box = ctk.CTkFrame(self, fg_color=C["panel"], corner_radius=12,
+                           border_width=1, border_color=C["border"])
+        box.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+        fam, mono = theme.ui_family(), theme.mono_family()
+        txt = tk.Text(box, wrap="word", bd=0, highlightthickness=0, cursor="hand2",
+                      bg=pick(C["panel"]), fg=pick(C["text"]), padx=10, pady=8,
+                      font=(fam, 11), spacing1=4, spacing3=4)
+        sb = ctk.CTkScrollbar(box, command=txt.yview)
+        txt.configure(yscrollcommand=sb.set)
+        sb.pack(side="right", fill="y", padx=(0, 4), pady=6)
+        txt.pack(side="left", fill="both", expand=True, padx=(4, 0), pady=4)
 
-        for row_num, (gidx, entry, role) in enumerate(rows):
-            bg = ("gray80", "gray20") if row_num % 2 == 0 else ("gray84", "gray17")
-            rf = ctk.CTkFrame(sf, fg_color=bg, corner_radius=6, cursor="hand2")
-            rf.pack(fill="x", padx=2, pady=2)
-            rf.grid_columnconfigure(1, weight=1)
+        txt.tag_configure("num", foreground=pick(C["muted"]), font=(fam, 10))
+        txt.tag_configure("t", font=theme.tkf(13, "bold"))
+        txt.tag_configure("best", foreground=pick(C["good"]))
+        txt.tag_configure("worst", foreground=pick(C["bad"]))
+        txt.tag_configure("scr", foreground=pick(C["muted"]), font=(mono, 9),
+                          lmargin1=12, lmargin2=12)
+        txt.tag_configure("hover", background=pick(C["panel_alt"]))
 
-            num_lbl = ctk.CTkLabel(rf, text=f"#{gidx+1}", width=38,
-                                   font=ctk.CTkFont(size=11), text_color="gray55")
-            num_lbl.grid(row=0, column=0, padx=(8, 4), pady=(6, 2), sticky="w")
-
-            if role == "best":    t_col = "#4CAF50"
-            elif role == "worst": t_col = "#E57373"
-            else:                 t_col = "#FFFFFF"
-
+        self._line_to_idx = {}
+        line = 1
+        for gidx, entry, role in rows:
             disp = display(entry, dec)
-            if role in ("best", "worst"):
+            if role != "normal":
                 disp = f"({disp})"
-
-            t_lbl = ctk.CTkLabel(rf, text=disp,
-                                  font=ctk.CTkFont(size=14, weight="bold"),
-                                  text_color=t_col)
-            t_lbl.grid(row=0, column=1, padx=4, pady=(6, 2), sticky="w")
-
-            if role == "best":
-                badge = ctk.CTkLabel(rf, text="BEST", width=46, height=18,
-                                     font=ctk.CTkFont(size=9, weight="bold"),
-                                     fg_color="#1a5a2a", corner_radius=4,
-                                     text_color="#4CAF50")
-                badge.grid(row=0, column=2, padx=(0, 8), pady=(6, 2))
-            elif role == "worst":
-                badge = ctk.CTkLabel(rf, text="WORST", width=50, height=18,
-                                     font=ctk.CTkFont(size=9, weight="bold"),
-                                     fg_color="#4a1818", corner_radius=4,
-                                     text_color="#E57373")
-                badge.grid(row=0, column=2, padx=(0, 8), pady=(6, 2))
-            else:
-                badge = None
-
+            txt.insert("end", f"#{gidx + 1}   ", ("num",))
+            txt.insert("end", disp, ("t", role))
+            if entry.get("note"):
+                txt.insert("end", f"   📝 {entry['note']}", ("num",))
+            txt.insert("end", "\n")
             scr = entry.get("scramble", "")
-            scr_lbl = ctk.CTkLabel(rf, text=scr,
-                                    font=ctk.CTkFont(size=10, family="Consolas"),
-                                    text_color="gray50", anchor="w", wraplength=440)
-            scr_lbl.grid(row=1, column=0, columnspan=3, padx=8, pady=(0, 6), sticky="w")
+            txt.insert("end", (scr or "—") + "\n", ("scr",))
+            self._line_to_idx[line] = gidx
+            self._line_to_idx[line + 1] = gidx
+            line += 2
+        txt.configure(state="disabled")
 
-            click_targets = [rf, num_lbl, t_lbl, scr_lbl]
-            if badge: click_targets.append(badge)
-            for w in click_targets:
-                w.bind("<Button-1>", lambda e, i=gidx: self._open_detail(i))
-            rf.bind("<Enter>", lambda e, f=rf: f.configure(fg_color=("gray75", "gray25")))
-            rf.bind("<Leave>", lambda e, f=rf, b=bg: f.configure(fg_color=b))
+        def _idx_at(e):
+            ln = int(txt.index(f"@{e.x},{e.y}").split(".")[0])
+            return ln, self._line_to_idx.get(ln)
 
-    def _open_detail(self, idx):
-        self._app._show_detail(idx)
+        def _click(e):
+            _, i = _idx_at(e)
+            if i is not None:
+                self._app._show_detail(i)
+
+        def _motion(e):
+            ln, i = _idx_at(e)
+            txt.tag_remove("hover", "1.0", "end")
+            if i is not None:
+                first = ln if ln % 2 == 1 else ln - 1
+                txt.tag_add("hover", f"{first}.0", f"{first + 2}.0")
+
+        txt.bind("<Button-1>", _click)
+        txt.bind("<Motion>", _motion)
+        txt.bind("<Leave>", lambda e: txt.tag_remove("hover", "1.0", "end"))

@@ -5,7 +5,7 @@ import os
 import sys
 import tempfile
 
-MAIN_DIR = r"C:\Users\User\rubik-timer"
+MAIN_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _load_persistence(tmp_cfg, tmp_data):

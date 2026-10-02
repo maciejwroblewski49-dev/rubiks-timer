@@ -3,6 +3,7 @@ try:
     import winsound as _winsound
     _HAS_WINSOUND = True
 except ImportError:
+    _winsound = None
     _HAS_WINSOUND = False
 
 
