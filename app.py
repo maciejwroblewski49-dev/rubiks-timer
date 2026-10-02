@@ -15,6 +15,7 @@ from persistence import ICON_FILE, _ASSETS, Config, Sessions
 from hardware_timer import MoyuInput, _load_sounddevice, _moyu_mode
 from cube_sim import _make_viz_state, _viz_net_dims
 from stats import SessionStats
+import backup
 from ui import theme
 from ui.theme import C, pick
 from ui.layout import LayoutManager, PANELS, PANEL_NAMES, PRESETS, FOCUS_LAYOUT
@@ -86,6 +87,10 @@ class App(ctk.CTk):
         self._solving_view: bool  = False
         self._edit_bar            = None
         self._celebration         = None
+        self._armed: bool         = False
+        self._arm_id              = None
+        self._insp_holding: bool  = False
+        self._pre_ready           = self.IDLE
         self._undo: list          = []      # deleted solves: (session, index, entry)
         self._fit_id              = None
         self._look_key            = None
@@ -132,6 +137,7 @@ class App(ctk.CTk):
                     self._moyu.start(self.cfg.g("moyu", "device"))
             self.after(300, _late_moyu)
         self.after(100, self._moyu_poll)
+        self.after(2500, self._auto_backup)
 
         self.bind("<KeyPress-space>",   self._kdown)
         self.bind("<KeyRelease-space>", self._kup)
@@ -368,6 +374,7 @@ class App(ctk.CTk):
         self._stats_cols = None
         self.stat_lbl = {}
         self._stat_tiles = []
+        self._stat_table = None
         self._rebuild_stats()
         self._stats_body.bind("<Configure>", lambda e: self._regrid_stats(), add="+")
 
@@ -405,12 +412,91 @@ class App(ctk.CTk):
         defs.append(("Solvy", "count"))
         return defs
 
+    def _table_rows(self):
+        """(label, n) rows of the csTimer-style table; n=1 = single."""
+        g = lambda k: self.cfg.g("stats", k)
+        rows = [("czas", 1)]
+        if g("show_mo3"):   rows.append(("mo3", 3))
+        if g("show_ao5"):   rows.append(("ao5", 5))
+        if g("show_ao12"):  rows.append(("ao12", 12))
+        if g("show_ao50"):  rows.append(("ao50", 50))
+        if g("show_ao100"): rows.append(("ao100", 100))
+        for n in g("custom_averages"):
+            if n not in (3, 5, 12, 50, 100):
+                rows.append((f"ao{n}", n))
+        return rows
+
+    def _build_stats_table(self):
+        """csTimer-like: one row per statistic, columns 'aktualna' and 'najlepsza'."""
+        body = self._stats_body
+        acc = self._acc()
+        hover = theme.tint(acc, "panel", 0.16)
+        tbl = ctk.CTkFrame(body, fg_color="transparent")
+        tbl.pack(fill="x", padx=4, pady=(2, 0))
+        for c, w in enumerate((1, 2, 2)):
+            tbl.grid_columnconfigure(c, weight=w, uniform="stt")
+        for c, txt in enumerate(("", "aktualna", "najlepsza")):
+            ctk.CTkLabel(tbl, text=txt, text_color=C["muted"], font=theme.font(11, "bold"),
+                         height=20, anchor="e" if c else "w").grid(row=0, column=c, sticky="ew", padx=6)
+        self._stat_table = {}
+        for r, (label, n) in enumerate(self._table_rows(), start=1):
+            ctk.CTkLabel(tbl, text=label, text_color=C["muted"], font=theme.font(13),
+                         anchor="w", height=28).grid(row=r, column=0, sticky="ew", padx=6)
+            cells = []
+            for c, which in ((1, "cur"), (2, "best")):
+                lbl = ctk.CTkLabel(tbl, text="—", text_color=C["text"], font=theme.font(15, "bold"),
+                                   anchor="e", height=28, corner_radius=6, cursor="hand2")
+                lbl.grid(row=r, column=c, sticky="ew", padx=2, pady=1)
+                lbl.bind("<Button-1>", lambda e, n=n, w=which: self._table_click(n, w))
+                lbl.bind("<Enter>", lambda e, l=lbl: l.configure(fg_color=hover))
+                lbl.bind("<Leave>", lambda e, l=lbl: l.configure(fg_color="transparent"))
+                cells.append(lbl)
+            self._stat_table[n] = cells
+        ctk.CTkFrame(body, height=1, fg_color=C["border"]).pack(fill="x", padx=8, pady=(8, 4))
+        self._stat_footer = ctk.CTkLabel(body, text="", text_color=C["muted"], font=theme.font(12),
+                                         justify="left", anchor="w")
+        self._stat_footer.pack(fill="x", padx=10)
+
+    def _table_click(self, n, which):
+        st = self.stats
+        if n == 1:
+            if which == "cur" and st.count:
+                self._show_detail(st.count - 1)
+            elif which == "best":
+                self._show_stat_detail("best")
+        else:
+            self._show_stat_detail(f"ao{n}" if which == "cur" else f"_best_{n}")
+
+    def _update_stats_table(self):
+        st = self.stats
+        times = self.sm.get(self.cur)["times"]
+        dec = self.cfg.g("timer", "decimals")
+        for n, (cur, best) in self._stat_table.items():
+            if n == 1:
+                c = display(times[-1], dec) if times else "—"
+                b = self._fs(st.best)
+            else:
+                c = self._fs(st.current(n))
+                b = self._fs(st.best_average(n)[0])
+            if cur.cget("text") != c: cur.configure(text=c)
+            if best.cget("text") != b: best.configure(text=b)
+        foot = f"solvy: {st.valid_count}/{st.count}"
+        if st.mean is not None:
+            foot += f"     średnia: {self._fs(st.mean)}"
+            if st.std is not None:
+                foot += f"  (σ {self._fs(st.std)})"
+        self._stat_footer.configure(text=foot)
+
     def _rebuild_stats(self):
         for w in self._stats_body.winfo_children():
             w.destroy()
         self.stat_lbl.clear()
         self._stat_tiles = []
+        self._stat_table = None
         self._stats_cols = None
+        if self.cfg.g("stats", "style") == "table":
+            self._build_stats_table()
+            return
         acc = self._acc()
         for title, key in self._stat_defs():
             tile = ctk.CTkFrame(self._stats_body, fg_color=C["panel_alt"], corner_radius=10)
@@ -544,7 +630,7 @@ class App(ctk.CTk):
         if pen_active:
             col = self.cfg.g("colors","timer_penalty")
         elif state == self.READY:
-            col = self.cfg.g("colors","timer_ready")
+            col = self.cfg.g("colors", "timer_armed" if self._armed else "timer_ready")
         elif state == self.INSPECTION:
             col = self.cfg.g("colors","timer_inspection")
         elif state == self.RUNNING:
@@ -714,14 +800,29 @@ class App(ctk.CTk):
         if self._state == self.MANUAL_INPUT:
             self._manual_cancel()
 
+        hold = int(self.cfg.g("timer", "hold_ms"))
         if self._state in (self.IDLE, self.STOPPED):
+            self._pre_ready = self._state
             self._state = self.READY
-            self._set_timer_color(self.READY)
-            self.hint_var.set("Puść SPACJĘ żeby wystartować")
             self._show_pens(False)
+            # like csTimer / a StackMat: hold SPACE until it turns green
+            # (starting the inspection needs no hold)
+            if hold <= 0 or self._insp_on.get():
+                self._arm()
+            else:
+                self._armed = False
+                self._set_timer_color(self.READY)
+                self.hint_var.set("Trzymaj SPACJĘ, aż timer zrobi się zielony…")
+                self._arm_id = self.after(hold, self._arm)
 
         elif self._state == self.INSPECTION:
-            self._start()
+            if hold <= 0:
+                self._start()
+            else:
+                self._insp_holding = True
+                self._armed = False
+                self.timer_lbl.set_color(self.cfg.g("colors", "timer_ready"))
+                self._arm_id = self.after(hold, self._arm)
 
         elif self._state == self.RUNNING:
             el = time.perf_counter() - self.start_t
@@ -729,9 +830,42 @@ class App(ctk.CTk):
             self._record(el, self._insp_pen)
             self._insp_pen = None
 
+    def _arm(self):
+        """SPACE held long enough: releasing it now starts the solve."""
+        self._arm_id = None
+        if not self.space_down:
+            return
+        if self._state == self.READY or (self._state == self.INSPECTION and self._insp_holding):
+            self._armed = True
+            self.timer_lbl.set_color(self.cfg.g("colors", "timer_armed"))
+            if self._state == self.READY:
+                self.hint_var.set("Puść SPACJĘ żeby wystartować")
+
+    def _cancel_arm(self):
+        if self._arm_id is not None:
+            self.after_cancel(self._arm_id)
+            self._arm_id = None
+
     def _kup(self, _e):
         self.space_down = False
+        if self._state == self.INSPECTION and self._insp_holding:
+            self._insp_holding = False
+            self._cancel_arm()
+            if self._armed:
+                self._start()
+            else:
+                self._set_timer_color(self.INSPECTION)
+            return
         if self._state != self.READY: return
+        if not self._armed:
+            # let go too early: back to where we were, nothing starts
+            self._cancel_arm()
+            self._state = self._pre_ready
+            self._set_timer_color(self._state)
+            self.hint_var.set(HINT_IDLE)
+            if self._state == self.STOPPED and self.sm.get(self.cur)["times"]:
+                self._show_pens(True)
+            return
 
         delay = self.cfg.g("timer","start_delay_ms")
         if self._insp_on.get():
@@ -741,12 +875,13 @@ class App(ctk.CTk):
             dur = self.cfg.g("timer","inspection_duration")
             self.timer_var.set(str(dur))
             self._set_timer_color(self.INSPECTION)
-            self.hint_var.set("Naciśnij SPACJĘ żeby pominąć inspekcję")
+            self.hint_var.set("Przytrzymaj i puść SPACJĘ żeby zacząć układać")
             self._set_solving_view(True)
         else:
             self.after(delay, self._start)
 
     def _start(self):
+        self._armed = False
         if self.insp_t and (time.perf_counter()-self.insp_t) > self.cfg.g("timer","inspection_duration"):
             self._insp_pen = "+2"
         self.insp_t = None
@@ -788,6 +923,9 @@ class App(ctk.CTk):
         entry = {"time":t, "penalty":penalty, "scramble":self.scramble,
                  "puzzle": self.puzzle_var.get(),
                  "date":datetime.now().isoformat()}
+        self._insp_holding = False
+        self._armed = False
+        self._cancel_arm()
         self.sm.add(self.cur, entry)
         st.append(entry)
         self._set_solving_view(False)
@@ -989,7 +1127,7 @@ class App(ctk.CTk):
         win.geometry("430x520")
         win.resizable(False, True)
         rows = [
-            ("Spacja", "przytrzymaj = gotowość, puść = start, naciśnij = stop"),
+            ("Spacja", "trzymaj, aż timer zrobi się zielony, puść = start, naciśnij = stop"),
             ("Esc", "przerwij inspekcję / wyjdź z edycji / pełnego ekranu"),
             ("Ctrl+1 / 2 / 3", "ostatni solve: OK / +2 / DNF"),
             ("Ctrl+Del", "usuń ostatni solve"),
@@ -1049,7 +1187,24 @@ class App(ctk.CTk):
         except Exception:
             pass
         self._stop_celebration()
+        if self.cfg.g("backup", "auto"):
+            try:
+                self.sm.flush(); self.cfg.flush()
+                backup.write_all(self.cfg.g("backup", "keep"), self.cfg.g("backup", "cloud_dir"))
+            except Exception:
+                pass                  # never block closing the app
         self.destroy()
+
+    def _auto_backup(self):
+        """Once a day (and on close): copy all data to backups/ (+ cloud folder)."""
+        if not self.cfg.g("backup", "auto") or not backup.due():
+            return
+        try:
+            self.sm.flush(); self.cfg.flush()
+        except Exception:
+            return
+        keep, cloud = self.cfg.g("backup", "keep"), self.cfg.g("backup", "cloud_dir")
+        threading.Thread(target=lambda: backup.write_all(keep, cloud), daemon=True).start()
 
     # ── stats ─────────────────────────────────────────────────────
 
@@ -1064,6 +1219,11 @@ class App(ctk.CTk):
         if st.count != len(times):            # something edited the list behind our back
             st.load(times)
         show_best_avg = self.cfg.g("stats", "show_best_avg")
+        n = st.count
+        self._count_lbl.configure(text=f"{n}" if n else "")
+        if self._stat_table is not None:
+            self._update_stats_table()
+            return
 
         for key, (val, sub) in self.stat_lbl.items():
             sub_txt = ""
@@ -1089,8 +1249,6 @@ class App(ctk.CTk):
                 val.configure(text=v_txt)
             if sub.cget("text") != sub_txt:
                 sub.configure(text=sub_txt)
-        n = st.count
-        self._count_lbl.configure(text=f"{n}" if n else "")
 
     # ── manual time entry ─────────────────────────────────────────
 
@@ -1476,6 +1634,9 @@ class App(ctk.CTk):
             self._fs_btn.configure(text="⛶")
         elif self._state == self.INSPECTION:
             self._state = self.IDLE
+            self._insp_holding = False
+            self._armed = False
+            self._cancel_arm()
             self.insp_t = None
             self._insp_pen = None
             self._insp_beeped.clear()

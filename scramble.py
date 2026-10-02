@@ -17,6 +17,37 @@ def gen_222():  return _gen(["U","R","F"], ["","'","2"], 9)
 def gen_444():  return _gen(["U","D","R","L","F","B","Uw","Dw","Rw","Lw","Fw","Bw"], ["","'","2"], 40)
 def gen_555():  return _gen(["U","D","R","L","F","B","Uw","Dw","Rw","Lw","Fw","Bw",
                               "3Uw","3Dw","3Rw","3Lw","3Fw","3Bw"], ["","'","2"], 60)
+_BIG = ["U","D","R","L","F","B","Uw","Dw","Rw","Lw","Fw","Bw"]
+def gen_666():  return _gen(_BIG + ["3Uw","3Dw","3Rw","3Lw","3Fw","3Bw"], ["","'","2"], 80)
+def gen_777():  return _gen(_BIG + ["3Uw","3Dw","3Rw","3Lw","3Fw","3Bw"], ["","'","2"], 100)
+def gen_fmc():
+    # WCA FMC scrambles start and end with R' U' F
+    return "R'  U'  F  " + gen_333() + "  R'  U'  F"
+
+def gen_sq1(twists=12):
+    """Square-1, random-move: (top,bottom) turns separated by slices "/".
+
+    Each layer is 12 slots of 30 degrees; a corner fills 2 slots, an edge 1.
+    A slice is only legal when no piece straddles the cut on either layer,
+    i.e. there is a piece boundary at slot 0 and slot 6.
+    """
+    top = ["e0","c0","c0","e1","c1","c1","e2","c2","c2","e3","c3","c3"]
+    bot = ["c4","c4","e4","c5","c5","e5","c6","c6","e6","c7","c7","e7"]
+    rot = lambda layer, k: layer[-k % 12:] + layer[:-k % 12]
+    ok = lambda l: l[11] != l[0] and l[5] != l[6]
+    out = []
+    for _ in range(twists):
+        while True:
+            x, y = random.randint(-5, 6), random.randint(-5, 6)
+            if (x, y) == (0, 0) and out:
+                continue
+            t, b = rot(top, x), rot(bot, y)
+            if ok(t) and ok(b):
+                break
+        out.append(f"({x},{y})")
+        top, bot = b[:6] + t[6:], t[:6] + b[6:]           # the slice swaps the halves
+    return " / ".join(out) + " /"
+
 def gen_pyra():
     body = _gen(["U","L","R","B"], ["","'"], 9).split("  ")
     tips = [t+random.choice(["","'"]) for t in random.sample(["u","l","r","b"], random.randint(2,4))]
@@ -54,6 +85,9 @@ def gen_mega():
     rows.append("U"+random.choice(["","'"]))
     return "\n".join(rows)
 
-PUZZLES = {"3x3":gen_333,"2x2":gen_222,"4x4":gen_444,"5x5":gen_555,
-           "Pyraminx":gen_pyra,"Skewb":gen_skewb,"Megaminx":gen_mega,
-           "FTO":gen_fto,"Clock":gen_clock,"3x3 OH":gen_333,"3x3 BLD":gen_333}
+# same order as the WCA event list in csTimer
+PUZZLES = {"3x3":gen_333, "2x2":gen_222, "4x4":gen_444, "5x5":gen_555,
+           "6x6":gen_666, "7x7":gen_777, "3x3 BLD":gen_333, "3x3 FMC":gen_fmc,
+           "3x3 OH":gen_333, "Clock":gen_clock, "Megaminx":gen_mega,
+           "Pyraminx":gen_pyra, "Skewb":gen_skewb, "Square-1":gen_sq1,
+           "4x4 BLD":gen_444, "5x5 BLD":gen_555, "FTO":gen_fto}

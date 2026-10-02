@@ -45,15 +45,15 @@ class StatDetailDialog(ctk.CTkToplevel):
             n = int(key[6:])
             v, end = st.best_average(n)
             if end is None:
-                return None, f"Najlepsze Ao{n}", "—"
-            return self._ao_data(n, times, dec, f"Najlepsze Ao{n}", end=end)
+                return None, "Najlepsze", "—"
+            return self._ao_data(n, times, dec, "Najlepsze " + ("Mo3" if n == 3 else f"Ao{n}"), end=end)
         if key.startswith("_cao_"):
             n = int(key[5:])
         elif key.startswith("ao"):
             n = int(key[2:])
         else:
             return None, key, "—"
-        return self._ao_data(n, times, dec, f"Ao{n}")
+        return self._ao_data(n, times, dec, "Mo3" if n == 3 else f"Ao{n}")
 
     def _ao_data(self, n, times, dec, label, end=None):
         if len(times) < n: return None, label, "—"

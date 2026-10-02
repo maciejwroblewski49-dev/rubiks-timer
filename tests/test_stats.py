@@ -102,3 +102,17 @@ def test_empty_session():
     assert eng.current(5) is None
     assert eng.best_average(5) == (None, None)
     assert eng.rolling(5) == []
+
+
+def test_square1_scrambles_are_legal():
+    import re
+    import scramble
+    for _ in range(200):
+        s = scramble.gen_sq1()
+        top = ["e0","c0","c0","e1","c1","c1","e2","c2","c2","e3","c3","c3"]
+        bot = ["c4","c4","e4","c5","c5","e5","c6","c6","e6","c7","c7","e7"]
+        rot = lambda layer, k: layer[-k % 12:] + layer[:-k % 12]
+        for x, y in re.findall(r"\((-?\d+),(-?\d+)\)", s):
+            t, b = rot(top, int(x)), rot(bot, int(y))
+            assert t[11] != t[0] and t[5] != t[6] and b[11] != b[0] and b[5] != b[6]
+            top, bot = b[:6] + t[6:], t[:6] + b[6:]

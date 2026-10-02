@@ -49,6 +49,7 @@ DEFAULTS = {
     "colors": {
         "timer_idle":       "#FFFFFF",
         "timer_ready":      "#FF4444",
+        "timer_armed":      "#44DD77",
         "timer_running":    "#44DD77",
         "timer_inspection": "#FFAA00",
         "timer_penalty":    "#FF4444",
@@ -61,6 +62,7 @@ DEFAULTS = {
         "inspection_duration": 15,
         "hide_during_solve":   False,
         "start_delay_ms":      0,
+        "hold_ms":             300,      # like csTimer: hold SPACE 0.3 s before it starts
         "decimals":            3,
         "refresh_ms":          30,
         "autosize":            True,
@@ -73,6 +75,9 @@ DEFAULTS = {
         "show_ao100":      False,
         "show_mean":       True,
         "custom_averages": [],
+        "style":           "table",   # "table" (jak csTimer) / "tiles"
+        "show_mo3":        True,
+        "show_ao50":       False,
         "trim_mode":       "wca",     # "wca" = ceil(5%) z każdej strony, "one" = zawsze 1
         "show_best_avg":   True,
     },
@@ -86,7 +91,7 @@ DEFAULTS = {
     "ui_zoom":       1.0,
     "accent":        "Niebieski",
     "layout": {
-        "preset":  "Klasyczny",
+        "preset":  "csTimer",
         "gap":     8,
         "radius":  14,
         "borders": True,
@@ -104,6 +109,11 @@ DEFAULTS = {
         "on_ao100":     True,
         "on_custom":    True,
         "on_target":    True,
+    },
+    "backup": {
+        "auto":      True,      # daily + on close
+        "keep":      14,
+        "cloud_dir": "",        # e.g. Google Drive / OneDrive folder
     },
     "window": {
         "geometry": "",

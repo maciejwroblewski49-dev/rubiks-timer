@@ -28,6 +28,20 @@ def _p(x, y, w, h, visible=True):
 # Each preset has two variants: without the cube preview, and with it (then
 # the preview gets its own slot instead of covering the timer).
 PRESETS = {
+    # csTimer: statistics + times on the left, scramble on top, timer in the
+    # middle, cube preview as a tool at the bottom
+    "csTimer": ({
+        "stats":    _p(0.00, 0.00, 0.25, 0.32),
+        "times":    _p(0.00, 0.32, 0.25, 0.68),
+        "scramble": _p(0.25, 0.00, 0.75, 0.17),
+        "timer":    _p(0.25, 0.17, 0.75, 0.83),
+    }, {
+        "stats":    _p(0.00, 0.00, 0.25, 0.32),
+        "times":    _p(0.00, 0.32, 0.25, 0.68),
+        "scramble": _p(0.25, 0.00, 0.75, 0.17),
+        "timer":    _p(0.25, 0.17, 0.75, 0.55),
+        "viz":      _p(0.25, 0.72, 0.75, 0.28),
+    }),
     "Klasyczny": ({
         "scramble": _p(0.00, 0.00, 1.00, 0.16),
         "timer":    _p(0.00, 0.16, 0.73, 0.60),
@@ -87,7 +101,7 @@ PRESETS = {
         "stats":    _p(0.10, 0.82, 0.80, 0.18),
     }),
 }
-DEFAULT_PRESET = "Klasyczny"
+DEFAULT_PRESET = "csTimer"
 CUSTOM = "Własny"
 
 # Focus mode (◉ / F) temporarily uses this instead of the saved layout.
